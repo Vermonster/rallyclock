@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe Acme::API do
+describe RallyClock::API do
   include Rack::Test::Methods
 
   def app
-    Acme::API
+    RallyClock::API
   end
     
   context "v1" do

@@ -13,6 +13,6 @@ end
 
 require 'capybara/rspec'
 Capybara.configure do |config|
-  config.app = Acme::App.new
+  config.app = RallyClock::App.new
 end
 
