@@ -1,8 +1,10 @@
 source "http://rubygems.org"
 
 gem "rack", "1.3.5"
-gem "grape", :git => "http://github.com/intridea/grape.git", :branch => "frontier"
+gem "grape", :git => "https://github.com/intridea/grape.git", :branch => "frontier"
 gem "json", "1.6.5"
+gem "activerecord", "~> 3.2.3"
+gem "thin", "~> 1.3.1"
 
 group :development do
   gem "guard"
