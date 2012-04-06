@@ -5,12 +5,17 @@ gem "grape", :git => "https://github.com/intridea/grape.git", :branch => "fronti
 gem "json", "1.6.5"
 gem "activerecord", "~> 3.2.3", :require => 'active_record'
 gem "thin", "~> 1.3.1"
-gem "pg"
+gem "sequel", "~> 3.34.1"
+gem "pg", "~> 0.13.2"
 
 group :development do
   gem "guard"
   gem "guard-bundler"
   gem "guard-rack"
+end
+
+group :development, :test do
+  gem "factory_girl", "~> 3.0.0"
 end
 
 group :test do

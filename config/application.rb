@@ -2,12 +2,18 @@ require File.expand_path('../boot', __FILE__)
 
 Bundler.require :default, ENV['RACK_ENV']
 
-ActiveRecord::Base.establish_connection(
-  adapter: 'postgresql',
-  host: 'localhost',
-  database: "rallyclock_#{ENV['RACK_ENV']}"
-)
+require 'yaml'
 
+# database connection
+config = YAML.load_file('../db/database.yml')[ENV['RACK_ENV']]
+Sequel.connect(config)
+
+# models
+Dir[File.expand_path('../../models/*.rb', __FILE__)].each do |f|
+  require f
+end
+
+# api versions
 Dir[File.expand_path('../../api/api_v*.rb', __FILE__)].each do |f|
   require f
 end
