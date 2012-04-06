@@ -3,8 +3,9 @@ source "http://rubygems.org"
 gem "rack", "1.3.5"
 gem "grape", :git => "https://github.com/intridea/grape.git", :branch => "frontier"
 gem "json", "1.6.5"
-gem "activerecord", "~> 3.2.3"
+gem "activerecord", "~> 3.2.3", :require => 'active_record'
 gem "thin", "~> 1.3.1"
+gem "pg"
 
 group :development do
   gem "guard"
