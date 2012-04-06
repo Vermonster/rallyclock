@@ -1,9 +1,7 @@
-module Acme
+module RallyClock
   class API < Grape::API
     prefix 'api'
-    mount ::Acme::API_v1
-    mount ::Acme::API_v2
-    mount ::Acme::API_v3
+    mount ::RallyClock::API_v1
   end
 end
 

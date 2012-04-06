@@ -1,4 +1,4 @@
 require File.expand_path('../config/environment', __FILE__)
 
-run Acme::App.new
+Rack::Handler::Thin.run RallyClock::App.new, :Port => 3000
 

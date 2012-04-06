@@ -1,4 +1,4 @@
-module Acme
+module RallyClock
   class App
     def initialize
       @filenames = [ '', '.html', 'index.html', '/index.html' ]
@@ -16,7 +16,7 @@ module Acme
         return response if response[0] != 404
       end
       # api
-      Acme::API.call(env)
+      RallyClock::API.call(env)
     end
   end
 end
