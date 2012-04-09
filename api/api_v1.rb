@@ -82,7 +82,16 @@ module RallyClock
             @group.remove_member(@user)
           end
         end
+
+        resource :clients do
+          post nil do
+            error!("Client Already Exists", 422) if Client.first(name: params[:name])
+            Client.create(name: params[:name], group_id: @group.id)
+          end
+        end
       end
     end
+    
+
   end
 end
