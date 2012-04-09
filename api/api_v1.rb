@@ -84,8 +84,11 @@ module RallyClock
         end
 
         resource :clients do
-          post nil do
+          before do
             error!("Client Already Exists", 422) if Client.first(name: params[:name])
+          end
+
+          post nil do
             Client.create(name: params[:name], group_id: @group.id)
           end
         end

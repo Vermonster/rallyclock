@@ -136,6 +136,7 @@ describe RallyClock::API do
 
       describe "group clients" do
         let!(:client) { Client.create(name: "Wayne Enterprises") }
+
         context "POST /group/:group_id/clients" do
           it "adds a client to the group -- returns 201" do
             post "/api/v1/groups/#{g.id}/clients", { name: "Luthor Industries" , t: u.api_key } 
@@ -155,7 +156,7 @@ describe RallyClock::API do
         end
 
         context "PUT group/:group_id/clients/:client_id" do
-          it "updates the existing client -- returns 200"
+          it "updates the existing client -- returns 200" 
           it "refuses to update for a non-admin -- returns 401"
           it "refuses to update a non-existant client -- returns 404"
         end
