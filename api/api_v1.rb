@@ -1,6 +1,9 @@
 module RallyClock
   class API_v1 < Grape::API
     version 'v1', :using => :path, :vendor => 'rallyclock', :format => :json
+    rescue_from :all
+    error_format :json
+
     resource :system do
       desc "Returns pong."
       get :ping do
