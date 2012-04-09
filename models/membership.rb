@@ -6,5 +6,13 @@ class Membership < Sequel::Model
     super
     validates_unique [:user_id, :group_id]
   end
+
+  def admin?
+    admin
+  end
+
+  def owner? 
+    owner
+  end
 end
 
