@@ -2,7 +2,8 @@ require 'securerandom'
 
 class User < Sequel::Model
   one_to_many :entries
-  one_to_one :membership
+  one_to_many :memberships
+  many_to_many :groups, :join_table => :memberships
  
   attr_accessor :password
 

@@ -6,7 +6,8 @@ describe User do
   it { should restrict_access_to(:password_salt) }
   it { should restrict_access_to(:password_hash) }
   it { should have_one_to_many(:entries) }
-  it { should have_one_to_one(:membership) }
+  it { should have_one_to_many(:memberships) }
+  it { should have_many_to_many(:groups) }
 
   it "is valid when it has a email and password" do
     u = User.new(email: 'a@foo.com', password: 'apples')
