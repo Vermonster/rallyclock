@@ -51,9 +51,9 @@ module SequelMatchers
     end
   end
 
-  matcher :have_column do |expected|
+  matcher :have_column do |expected, options|
     match do |actual|
-      actual.class.columns.include?(expected) 
+      (meta = actual.class.db_schema[expected]) && (options[:type] ? options[:type] == meta[:type] : true)
     end
   end
   

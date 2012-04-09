@@ -5,6 +5,8 @@ class Entry < Sequel::Model
 
   def validate
     super
-    validates_presence :time, :note, :user_id
+    validates_presence :time
+    validates_presence :note
+    validates_presence :user_id
   end
 end

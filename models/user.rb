@@ -1,10 +1,8 @@
 require 'securerandom'
 
 class User < Sequel::Model
-  plugin :validation_helpers
-  plugin :json_serializer
-
   one_to_many :entries
+  one_to_one :membership
  
   attr_accessor :password
 

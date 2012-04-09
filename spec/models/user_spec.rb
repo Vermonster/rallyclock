@@ -1,11 +1,12 @@
 require 'spec_helper'
 
 describe User do
-  it { should have_column(:email) }
+  it { should have_column(:email, :type => :string) }
   #it { should validate_presence_of(:email) }
   it { should restrict_access_to(:password_salt) }
   it { should restrict_access_to(:password_hash) }
   it { should have_one_to_many(:entries) }
+  it { should have_one_to_one(:membership) }
 
   it "is valid when it has a email and password" do
     u = User.new(email: 'a@foo.com', password: 'apples')

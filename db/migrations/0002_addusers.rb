@@ -8,7 +8,7 @@ Sequel.migration do
       String :password_hash
       String :api_key
       DateTime :created_at
-      DateTIme :updated_at
+      DateTime :updated_at
     end
   end
 
