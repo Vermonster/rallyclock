@@ -6,7 +6,7 @@ describe RallyClock::API do
   def app
     RallyClock::API
   end
-    
+
   context "v1" do
     context "system" do
       it "ping" do
@@ -26,18 +26,18 @@ describe RallyClock::API do
       end
 
       #it "returns errors if they exist" do
-        #post "/api/v1/users"
-        #last_response.status.should eq(400)
+      #post "/api/v1/users"
+      #last_response.status.should eq(400)
 
-        #content = JSON.parse(last_response.body)
-        #binding.pry
+      #content = JSON.parse(last_response.body)
+      #binding.pry
       #end
     end
 
     context "POST /sessions" do
       it "authenticates a user by X_HEADERS with email" do
         u = User.create(email: 'a@foo.com', password: 'apples', username: 'a')  
-      
+
         post "/api/v1/sessions", {}, { 'HTTP_X_USERNAME' => 'a@foo.com', 'HTTP_X_PASSWORD' => 'apples' } 
         last_response.status.should eq(201)
 
@@ -47,7 +47,7 @@ describe RallyClock::API do
 
       it "authenticates a user by X_HEADERS with username" do
         u = User.create(email: 'a@foo.com', password: 'apples', username: 'a')  
-      
+
         post "/api/v1/sessions", {}, { 'HTTP_X_USERNAME' => 'a', 'HTTP_X_PASSWORD' => 'apples' } 
         last_response.status.should eq(201)
 
@@ -61,7 +61,7 @@ describe RallyClock::API do
 
         post "/api/v1/sessions", {t: token}
         last_response.status.should eq(201)
-        
+
         content = JSON.parse(last_response.body)
         content.should eq(u)
       end
@@ -71,7 +71,7 @@ describe RallyClock::API do
       it "creates a new group" do
         u = User.create(email: 'a@foo.com', password: 'apples', username: 'a')
         token = u.api_key
-        
+
         post "/api/v1/groups", {name: 'vermonster', t: token}
         last_response.status.should eq(201)
 
@@ -80,82 +80,64 @@ describe RallyClock::API do
         u.memberships.first.group.should == u.groups.first
       end
     end
-    
-    context "DELETE /groups/:id" do
+
+    describe "groups" do
       let!(:u) { User.create(email: 'a@foo.com', password: 'apples', username: 'a') } 
       let!(:g) { Group.create(name: 'vermonster', owner_id: u.id) } 
       let!(:bono) { User.create(email: 'b@foo.com', password: 'apples', username: 'bono') } 
 
-      before { Membership.create(user_id: u.id, group_id: g.id) } 
+      before { Membership.create(user_id: u.id, group_id: g.id, admin: true) } 
 
-      it "deletes a group" do
-        delete "/api/v1/groups/#{g.id}", {t: u.api_key}
-        last_response.status.should eq(200)
-        u.groups.should be_empty
-        u.memberships.should be_empty
+      context "DELETE /groups/:id" do
+        it "deletes a group" do
+          delete "/api/v1/groups/#{g.id}", {t: u.api_key}
+          last_response.status.should eq(200)
+          u.groups.should be_empty
+          u.memberships.should be_empty
+        end
+
+        it "returns 401 when trying to delete a unowned group" do
+          delete "/api/v1/groups/#{g.id}", {t: bono.api_key}
+          last_response.status.should eq(401)
+          Group.count.should eq(1)
+        end
       end
 
-      it "returns 401 when trying to delete a unowned group" do
-        delete "/api/v1/groups/#{g.id}", {t: bono.api_key}
-        last_response.status.should eq(401)
-        Group.count.should eq(1)
-      end
-    end
+      context "POST /groups/:id/users" do
+        it "adds a user to the group" do
+          post "/api/v1/groups/#{g.id}/users", {email: bono.email, t: u.api_key}
+          last_response.status.should eq(201)
 
-    context "POST /groups/:id/users" do
-      let!(:u) { User.create(email: 'a@foo.com', password: 'apples', username: 'a') } 
-      let!(:g) { Group.create(name: 'vermonster', owner_id: u.id) } 
-      let!(:bono) { User.create(email: 'b@foo.com', password: 'apples', username: 'bono') } 
+          g.users.should include(u,bono)
+        end
 
-      before { 
-        Membership.create(user_id: u.id, group_id: g.id, admin: true, owner: true) 
-      } 
+        it "returns 404 if the user doesn't exist" do
+          post "/api/v1/groups/#{g.id}/users", {email: 'c@foo.com', t: u.api_key}
+          last_response.status.should eq(404)
+        end
 
-      it "adds a user to the group" do
-        post "/api/v1/groups/#{g.id}/users", {email: bono.email, t: u.api_key}
-        last_response.status.should eq(201)
-
-        g.users.should include(u,bono)
+        it "returns 401 if the user is not an admin" do
+          post "/api/v1/groups/#{g.id}/users", {email: 'c@foo.com', t: bono.api_key}
+          last_response.status.should eq(401)
+        end
       end
 
-      it "returns 404 if the user doesn't exist" do
-        token = u.api_key
+      context "PUT /groups/:group_id/users/:username" do
+        it "updates an existing user" do
+          put "/api/v1/groups/#{g.id}/users/#{bono.username}", { :user => { admin: true }, t: u.api_key } 
+          last_response.status.should eq(200)
+          bono.should be_admin_of g
+        end
 
-        post "/api/v1/groups/#{g.id}/users", {email: 'c@foo.com', t: token}
-        last_response.status.should eq(404)
-      end
+        it "returns 404 if the user doesn't exist" do
+          put "/api/v1/groups/#{g.id}/users/asldfkalsjdhflkajsdhfalskjdfhaskdjfh", { :user => { admin: true }, t: u.api_key }
+          last_response.status.should eq(404)
+        end
 
-      it "returns 401 if the user is not an admin" do
-        token = bono.api_key
-
-        post "/api/v1/groups/#{g.id}/users", {email: 'c@foo.com', t: token}
-        last_response.status.should eq(401)
-      end
-    end
-
-    context "PUT /groups/:group_id/users/:username" do
-      let!(:u) { User.create(email: 'a@foo.com', password: 'apples', username: 'a') } 
-      let!(:g) { Group.create(name: 'vermonster', owner_id: u.id) } 
-      let!(:bono) { User.create(email: 'b@foo.com', password: 'apples', username: 'bono') } 
-      
-      before { 
-        Membership.create(user_id: u.id, group_id: g.id, admin: true, owner: true) 
-      } 
-
-      it "updates an existing user" do
-        put "/api/v1/groups/#{g.id}/users/#{bono.username}", { :user => { admin: true }, t: u.api_key } 
-        last_response.status.should eq(200)
-        bono.should be_admin_of g
-      end
-      
-      it "returns 404 if the user doesn't exist" do
-        put "/api/v1/groups/#{g.id}/users/asldfkalsjdhflkajsdhfalskjdfhaskdjfh", { :user => { admin: true }, t: u.api_key }
-        last_response.status.should eq(404)
-      end
-      
-      it "returns 401 if the user is not an admin" do
-        put "/api/v1/groups/#{g.id}/users/#{u.username}", { :user => { admin: true }, t: bono.api_key }
-        last_response.status.should eq(401)
+        it "returns 401 if the user is not an admin" do
+          put "/api/v1/groups/#{g.id}/users/#{u.username}", { :user => { admin: true }, t: bono.api_key }
+          last_response.status.should eq(401)
+        end
       end
     end
   end

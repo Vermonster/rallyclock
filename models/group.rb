@@ -30,5 +30,9 @@ class Group < Sequel::Model
   def add_member(user)
     Membership.create(group_id: id, user_id: user.id, admin: false)
   end
+
+  def remove_member(user)
+    memberships.first(user_id: user.id).destroy
+  end
 end
 

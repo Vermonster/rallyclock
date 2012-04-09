@@ -55,57 +55,31 @@ module RallyClock
       end
 
       segment "/:group_id" do
+        before do
+          @group = current_user.groups_dataset[params[:group_id].to_i]
+          error!("Unauthorized", 401) unless @group && @group.admin?(current_user)
+        end
         
         delete nil do
-          g = current_user.groups_dataset[params[:group_id].to_i]
-          if g && g.owner?(current_user)
-            g.destroy
-          else
-            error!('Unauthorized', 401)
-          end
+          @group.destroy
         end
 
         resource :users do
-          post nil do
-            g = current_user.groups_dataset[params[:group_id].to_i]
+          before do
+            @user = User.filter({email: params[:email]}|{username: params[:username]}).first
+            error!("User does not exist", 404) unless @user
+          end
 
-            if g && g.admin?(current_user)
-              if u = User.first(email: params[:email])
-                g.add_member(u)
-              else
-                error!("User does not exist", 404)
-              end
-            else
-              error!("Unauthorized", 401)
-            end
+          post nil do
+            @group.add_member(@user)
           end
 
           put ":username" do
-            g = current_user.groups_dataset[params[:group_id].to_i]
-
-            if g && g.admin?(current_user)
-              if u = User.first(username: params[:username])
-                g.add_admin(u)
-              else
-                error!("User does not exist", 404)
-              end
-            else
-              error!("Unauthorized", 401)
-            end
+            @group.add_admin(@user)
           end
 
           delete ":username" do
-            g = current_user.groups_dataset[params[:group_id].to_i]
-
-            if g && g.admin?(current_user)
-              if u = User.first(id: params[:id].to_i)
-                g.memberships.first(user_id: u.id).destroy
-              else
-                error!("User does not exist", 404)
-              end
-            else
-              error!("Unauthorized", 401)
-            end
+            @group.remove_member(@user)
           end
         end
       end
