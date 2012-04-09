@@ -13,8 +13,12 @@ module RallyClock
 
     resource :users do
       post nil do
-        error!("error!", 400) unless params[:email] && params[:password]
-        User.create(email: params[:email], password: params[:password])
+        u = User.new(email: params[:email], password: params[:password])
+        if u.valid?
+          u.save
+        else
+          error!(u.errors.full_messages, 400)
+        end
       end
     end
 
