@@ -1,12 +1,10 @@
 require File.expand_path('../boot', __FILE__)
 
 Bundler.require :default, ENV['RACK_ENV']
-
-require 'yaml'
+require 'active_support/all'
 
 # database connection
-config = YAML.load_file('../db/database.yml')[ENV['RACK_ENV']]
-Sequel.connect(config)
+Sequel.connect(ENV['DATABASE_URL'])
 
 # models
 Dir[File.expand_path('../../models/*.rb', __FILE__)].each do |f|
