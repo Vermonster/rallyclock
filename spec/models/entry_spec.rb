@@ -7,7 +7,7 @@ describe Entry do
   it { should have_many_to_one(:user) }
 
   it "is valid when it has a time, belongs to a user, and has a note" do
-    u = User.create(email: 'a@foo.com', password: 'apples')
+    u = User.create(email: 'a@foo.com', password: 'apples', username: 'a')
     e = Entry.create(time: 10, note: 'chunky bacon', user_id: u.id)
     e.should be_valid
   end
