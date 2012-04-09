@@ -35,8 +35,12 @@ class User < Sequel::Model
 
   def validate
     super
+
     validates_presence :email
+    validates_presence :username
     validates_presence :password if new?
+
     validates_unique :email
+    validates_unique :username
   end
 end
