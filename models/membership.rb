@@ -1,5 +1,5 @@
 class Membership < Sequel::Model
-  one_to_one :user
+  many_to_one :user
   many_to_one :group
 
   def validate

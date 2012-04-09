@@ -10,5 +10,25 @@ class Group < Sequel::Model
     validates_presence :name
     validates_unique [:name, :owner_id]
   end
+
+  def admins
+    [owner] + memberships_dataset.filter(:admin).map(&:user)
+  end
+
+  def admin?(user)
+    admins.include?(user) || owner?(user)
+  end
+
+  def owner?(user)
+    owner == user
+  end
+
+  def add_admin(user)
+    Membership.create(group_id: id, user_id: user.id, admin: true)
+  end
+
+  def add_member(user)
+    Membership.create(group_id: id, user_id: user.id, admin: false)
+  end
 end
 

@@ -14,24 +14,18 @@ class User < Sequel::Model
     generate_api_key
   end
 
-  def self.authenticate(email, password)
-    user = User.first(email: email)
-    if user && user.password_hash == BCrypt::Engine.hash_secret(password, user.password_salt)
-      user
-    else
-      nil
-    end
+  def self.authenticate(login, password)
+    user = User.filter({ email: login }|{ username: login}).first
+    user if user && user.gave_correct_password?(password)
   end
 
-  def encrypt_password
-    if password.present?
-      self.password_salt = BCrypt::Engine.generate_salt
-      self.password_hash = BCrypt::Engine.hash_secret(password, password_salt)
-    end
+  def admin_of?(group)
+    # replace with group.admins.include? self
+    membership_for(group) && membership_for(group).admin?
   end
 
-  def generate_api_key
-    self.api_key = SecureRandom.base64(15).tr('+/=lIO0', 'pqrsxyz')
+  def owner_of?(group)
+    membership_for(group) && membership_for(group).owner?
   end
 
   def validate
@@ -44,4 +38,26 @@ class User < Sequel::Model
     validates_unique :email
     validates_unique :username
   end
+
+  def membership_for(group)
+    memberships_dataset.first(group_id: group.id)
+  end
+
+  def gave_correct_password?(given)
+    password_hash == BCrypt::Engine.hash_secret(given, password_salt)
+  end
+
+  private 
+
+  def encrypt_password
+    if password.present?
+      self.password_salt = BCrypt::Engine.generate_salt
+      self.password_hash = BCrypt::Engine.hash_secret(password, password_salt)
+    end
+  end
+
+  def generate_api_key
+    self.api_key = SecureRandom.base64(15).tr('+/=lIO0', 'pqrsxyz')
+  end
+
 end
