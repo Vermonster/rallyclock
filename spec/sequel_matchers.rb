@@ -17,7 +17,7 @@ module SequelMatchers
   # validate_unique
   # restrict_access_to
   # allow_access_to
-  # have_column :name, :type => String
+  # have_column :name, :type => :string
   # have_many_to_one
   # have_one_to_many
   # have_many_to_many
