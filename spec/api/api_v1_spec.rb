@@ -25,13 +25,13 @@ describe RallyClock::API do
         User.first(email: 'a@foo.com').should_not be_nil
       end
 
-      it "returns errors if they exist" do
-        post "/api/v1/users"
-        last_response.status.should eq(400)
+      #it "returns errors if they exist" do
+        #post "/api/v1/users"
+        #last_response.status.should eq(400)
 
         #content = JSON.parse(last_response.body)
-        # binding.pry
-      end
+        #binding.pry
+      #end
     end
 
     context "POST /sessions" do
