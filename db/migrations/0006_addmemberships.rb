@@ -2,9 +2,9 @@ Sequel.migration do
   up do
     create_table(:memberships) do
       primary_key :id
-      TrueClass :client
-      TrueClass :admin
-      TrueClass :owner
+      TrueClass :client, :default => false
+      TrueClass :admin, :default => false
+      TrueClass :owner, :default => false
       foreign_key :user_id, :users
       foreign_key :group_id, :groups
       DateTime :created_at
