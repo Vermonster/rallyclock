@@ -1,6 +1,7 @@
 class Sequel::Model
   plugin :json_serializer
   plugin :validation_helpers
+  plugin :association_dependencies
 
   def before_create
     self.created_at ||= Time.now

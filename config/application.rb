@@ -6,6 +6,11 @@ require 'active_support/all'
 # database connection
 Sequel.connect(ENV['DATABASE_URL'])
 
+# initializers
+Dir[File.expand_path('../../config/initializers/*.rb', __FILE__)].each do |f|
+  require f
+end
+
 # models
 Dir[File.expand_path('../../models/*.rb', __FILE__)].each do |f|
   require f
