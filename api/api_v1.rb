@@ -84,12 +84,42 @@ module RallyClock
         end
 
         resource :clients do
-          before do
-            error!("Client Already Exists", 422) if Client.first(name: params[:name])
+          post nil do
+            error!("Client Already Exists", 422) if @group.clients_dataset.first(name: params[:name])
+            Client.create(name: params[:name], group_id: @group.id)
           end
 
-          post nil do
-            Client.create(name: params[:name], group_id: @group.id)
+          put ":id" do
+            error!("Client Does Not Exist", 404) unless client = @group.clients_dataset[params[:id].to_i]
+            client.update(params[:client])
+          end
+
+          delete ":id" do
+            error!("Client Does Not Exist", 404) unless client = @group.clients_dataset[params[:id].to_i]
+            @group.clients_dataset[params[:id].to_i].destroy 
+          end
+
+          segment "/:client_id" do
+            before do
+              error!("Client Does Not Exist", 404) unless @client = @group.clients_dataset[params[:client_id].to_i]
+            end
+
+            resource :projects do
+              post nil do
+                error!("Project Already Exists", 422) if @client.projects_dataset.first(name: params[:name])
+                Project.create(name: params[:name], client_id: @client.id)
+              end
+
+              put ":id" do
+                error!("Project Does Not Exist", 404) unless project = @client.projects_dataset[params[:id].to_i]
+                Project.update(params[:project])
+              end
+
+              delete ":id" do
+                error!("Project Does Not Exist", 404) unless project = @client.projects_dataset[params[:id].to_i]
+                @client.projects_dataset[params[:id].to_i].destroy 
+              end
+            end
           end
         end
       end

@@ -135,7 +135,7 @@ describe RallyClock::API do
       end
 
       describe "group clients" do
-        let!(:client) { Client.create(name: "Wayne Enterprises") }
+        let!(:client) { Client.create(name: "Wayne Enterprises", group_id: g.id) }
 
         context "POST /group/:group_id/clients" do
           it "adds a client to the group -- returns 201" do
@@ -150,34 +150,105 @@ describe RallyClock::API do
           end
 
           it "refuses to add a client for a non-admin -- returns 401" do
-            post "/api/v1/groups/#{g.id}/clients", { name: client.name , t: bono.api_key } 
+            post "/api/v1/groups/#{g.id}/clients", { name: "Luthor Industries" , t: bono.api_key } 
             last_response.status.should == 401
           end
         end
 
-        context "PUT group/:group_id/clients/:client_id" do
-          it "updates the existing client -- returns 200" 
-          it "refuses to update for a non-admin -- returns 401"
-          it "refuses to update a non-existant client -- returns 404"
+        context "PUT group/:group_id/clients/:id" do
+          it "updates the existing client -- returns 200" do
+            put "/api/v1/groups/#{g.id}/clients/#{client.id}", {t: u.api_key, client: {name: 'Bioware'}}
+            last_response.status.should eq(200)
+
+            client.reload
+            client.name.should eq('Bioware')
+          end
+          
+          it "refuses to update for a non-admin -- returns 401" do
+            put "/api/v1/groups/#{g.id}/clients/#{client.id}", { t: bono.api_key, client: { name: 'Bioware'}}
+            last_response.status.should eq(401)
+          end
+          
+          it "refuses to update a non-existant client -- returns 404" do
+            put "/api/v1/groups/#{g.id}/clients/#{client.id+1}", {t: u.api_key, client: {name: 'Bioware'}}
+            last_response.status.should eq(404)
+          end
         end
 
-        context "DELETE group/:group_id/clients/:client_id" do
-          it "destroys an existing client -- returns 200" 
-          it "refuses to destroy a non-existent client -- returns 404"
-          it "refuses to destroy for a non-admin -- returns 401"
+        context "DELETE group/:group_id/clients/:id" do
+          it "destroys an existing client -- returns 200" do
+            delete "/api/v1/groups/#{g.id}/clients/#{client.id}", {t: u.api_key}
+            last_response.status.should eq(200)
+          end
+          
+          it "refuses to destroy a non-existent client -- returns 404" do
+            delete "/api/v1/groups/#{g.id}/clients/#{client.id+1}", {t: u.api_key}
+            last_response.status.should eq(404)
+          end
+          
+          it "refuses to destroy for a non-admin -- returns 401" do
+            delete "/api/v1/groups/#{g.id}/clients/#{client.id}", {t: bono.api_key}
+            last_response.status.should eq(401)
+          end
         end
 
         describe "client projects" do
-          context "POST group/:group_id/clients" do
+          let!(:client) { Client.create(name: "Cyberdyne", group_id: g.id) }
+          let!(:project) { Project.create(name: "Skynet", client_id: client.id) }
+          
+          context "POST group/:group_id/clients/:client_id/projects" do
+            it "adds a project to a client -- returns 201" do
+              post "/api/v1/groups/#{g.id}/clients/#{client.id}/projects", { name: "T-X" , t: u.api_key } 
+              last_response.status.should eq(201)
+              Project.count.should eq(2)
+            end
 
+            it "refuses to add a client if one with the same name already exists -- returns 422" do
+              post "/api/v1/groups/#{g.id}/clients/#{client.id}/projects", { name: project.name , t: u.api_key } 
+              last_response.status.should eq(422)
+            end
+
+            it "refuses to add a client for a non-admin -- returns 401" do
+              post "/api/v1/groups/#{g.id}/clients/#{client.id}/projects", { name: "T-X" , t: bono.api_key } 
+              last_response.status.should eq(401)
+            end
           end
 
-          context "PUT group/:group_id/clients/:client_id" do
+          context "PUT group/:group_id/clients/:client_id/projects/:id" do
+            it "updates the existing project -- returns 200" do
+              put "/api/v1/groups/#{g.id}/clients/#{client.id}/projects/#{project.id}", {t: u.api_key, project: {name: 'T-1000'}}
+              last_response.status.should eq(200)
 
+              project.reload
+              project.name.should eq('T-1000')
+            end
+            
+            it "refuses to update for a non-admin -- returns 401" do
+              put "/api/v1/groups/#{g.id}/clients/#{client.id}/projects/#{project.id}", { t: bono.api_key, project: { name: 'T-1000'}}
+              last_response.status.should eq(401)
+            end
+            
+            it "refuses to update a non-existant client -- returns 404" do
+              put "/api/v1/groups/#{g.id}/clients/#{client.id}/projects/#{project.id+1}", {t: u.api_key, project: {name: 'T-1000'}}
+              last_response.status.should eq(404)
+            end
           end
 
-          context "DELETE group/:group_id/clients/:client_id" do
-
+          context "DELETE group/:group_id/clients/:client_id/projects/:id" do
+            it "destroys an existing project -- returns 200" do
+              delete "/api/v1/groups/#{g.id}/clients/#{client.id}/projects/#{project.id}", {t: u.api_key}
+              last_response.status.should eq(200)
+            end
+            
+            it "refuses to destroy a non-existent project -- returns 404" do
+              delete "/api/v1/groups/#{g.id}/clients/#{client.id}/projects/#{project.id+1}", {t: u.api_key}
+              last_response.status.should eq(404)
+            end
+            
+            it "refuses to destroy for a non-admin -- returns 401" do
+              delete "/api/v1/groups/#{g.id}/clients/#{client.id}", {t: bono.api_key}
+              last_response.status.should eq(401)
+            end
           end
         end
       end
