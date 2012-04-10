@@ -99,6 +99,16 @@ describe RallyClock::API do
           post '/api/v1/users', { email: 'des@cogito.ergo.sum', password: "foo", username: "rene" } 
           last_response.status.should eq(422)
         end
+
+        it "rejects invalid emails" do
+          post '/api/v1/users', { email: 'desogito.ergo.sum', password: "foo", username: "rasdlfkjasdf" } 
+          last_response.status.should eq(403)
+        end
+
+        it "rejects usernames with invalid characters" do
+          post '/api/v1/users', { email: 'des@cogito.ergo.sum', password: "foo", username: "r ne" } 
+          last_response.status.should eq(403)
+        end
       end
     end
 

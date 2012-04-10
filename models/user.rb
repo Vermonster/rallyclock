@@ -37,6 +37,9 @@ class User < Sequel::Model
 
     validates_unique :email
     validates_unique :username
+
+    validates_format /^\w+$/, :username
+    validates_format /@/, :email
   end
 
   def membership_for(group)
