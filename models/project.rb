@@ -1,5 +1,7 @@
 class Project < Sequel::Model
-  many_to_one :clients
+  many_to_one :client
+
+  delegate [:group] => :client
 
   def validate
     super
