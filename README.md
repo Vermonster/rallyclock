@@ -21,9 +21,9 @@ A [Grape](http://github.com/intridea/grape) API mounted on RACK.
 * DELETE /groups/:group_id/clients/:client_id/projects/:id
 
 TODOS:
-both post and put should pass all attributes
-actions to activate/archive clients and projects
-missing actions
+both post and put should pass all attributes  
+actions to activate/archive clients and projects  
+missing actions  
 
   * GET /me
   * GET /groups/:id
@@ -34,14 +34,14 @@ missing actions
   * GET /groups/:group_id/clients/:id
   * GET /groups/:group_id/clients/:client_id/projects
   * GET /groups/:group_id/clients/:client_id/projects/:id
-Tasks
-Invoices
-Reports
-Timers (proposed)
+Tasks  
+Invoices  
+Reports  
+Timers (proposed)  
 
   * POST /timer
   * DELETE /timer (results in an entry)
-Entries (proposed)
+Entries (proposed)  
 
   * GET /today
   * GET /entries/YYYYMMDD
@@ -52,8 +52,8 @@ Entries (proposed)
   * PUT /entries/:id
   * DELETE /entries/:id
   
-Client Contacts
+Client Contacts  
 
-Are the URLs too long? ("/clients", "/projects", "/users")
+Are the URLs too long? ("/clients", "/projects", "/users")  
 
 
