@@ -84,13 +84,13 @@ module RallyClock
 
         resource :clients do
           post nil do
-            error!("Client Already Exists", 422) if @group.clients_dataset.first(name: params[:name])
-            Client.create(name: params[:name], group_id: @group.id)
+            error!("Client Already Exists", 422) if @group.clients_dataset.first(account: params[:client][:account])
+            @group.add_client Client.new(params[:client])
           end
 
-          segment "/:client_id" do
+          segment "/:client_account" do
             before do
-              error!("Client Does Not Exist", 404) unless @client = @group.clients_dataset[params[:client_id].to_i]
+              error!("Client Does Not Exist", 404) unless @client = @group.clients_dataset.first(account: params[:client_account])
             end
           
             put nil do
@@ -103,13 +103,13 @@ module RallyClock
 
             resource :projects do
               post nil do
-                error!("Project Already Exists", 422) if @client.projects_dataset.first(name: params[:name])
-                Project.create(name: params[:name], client_id: @client.id)
+                error!("Project Already Exists", 422) if @client.projects_dataset.first(code: params[:project][:code])
+                @client.add_project Project.new(params[:project])
               end
   
-              segment "/:project_id" do
+              segment "/:project_code" do
                 before do
-                  error!("Project Does Not Exist", 404) unless @project = @client.projects_dataset[params[:project_id].to_i]
+                  error!("Project Does Not Exist", 404) unless @project = @client.projects_dataset.first(code: params[:project_code])
                 end
 
                 put nil do

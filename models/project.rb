@@ -3,7 +3,9 @@ class Project < Sequel::Model
 
   def validate
     super
-    validates_presence :name
-    validates_unique [:name, :client_id]
+    validates_presence [:name, :code]
+    validates_unique [:name, :code, :client_id]
+
+    validates_format /^\w+$/, :code
   end
 end

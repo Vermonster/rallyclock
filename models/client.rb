@@ -4,7 +4,8 @@ class Client < Sequel::Model
 
   def validate
     super
-    validates_presence :name
-    validates_unique [:group_id, :name]
+    validates_presence [:name, :account]
+    validates_unique [:group_id, :account, :name]
+    validates_format /^\w+$/, :account
   end
 end
