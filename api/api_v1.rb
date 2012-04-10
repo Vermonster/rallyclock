@@ -48,9 +48,7 @@ module RallyClock
 
       post nil do
         g = Group.create(name: params[:name])
-        Membership.create(user_id: current_user.id, group_id: g.id, 
-                          owner: true,
-                          admin: true)
+        Membership.create(user_id: current_user.id, group_id: g.id, admin: true)
       end
 
       segment "/:group_id" do
