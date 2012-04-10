@@ -26,6 +26,8 @@ RSpec.configure do |config|
   end   
 end
 
+include Rack::Test::Methods
+
 require 'capybara/rspec'
 Capybara.configure do |config|
   config.app = RallyClock::App.new

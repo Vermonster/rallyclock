@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 describe RallyClock::API do
-  include Rack::Test::Methods
-
   def app
     RallyClock::API
   end
@@ -144,7 +142,6 @@ describe RallyClock::API do
     describe "groups" do
       context "POST /groups" do
         it "creates a new group" do
-
           post "/api/v1/groups", { name: 'Wayne Enterprises', t: u.api_key }
           last_response.status.should eq(201)
 

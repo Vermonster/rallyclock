@@ -1,5 +1,9 @@
 module RallyClock
   class API_v1 < Grape::API
+    use Rack::Config do |env|
+      env['api.tilt.root'] = File.expand_path(File.join('rabl/'))
+    end
+
     version 'v1', :using => :path, :vendor => 'rallyclock', :format => :json
     rescue_from :all
     error_format :json
@@ -18,6 +22,10 @@ module RallyClock
       desc "Returns pong."
       get :ping do
         "pong"
+      end
+
+      get :pang, :rabl => 'pang' do
+        #this line intentionally blank
       end
     end
 
