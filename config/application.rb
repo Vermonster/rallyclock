@@ -24,3 +24,4 @@ end
 require File.expand_path('../../api/api.rb', __FILE__)
 require File.expand_path('../../app/rallyclock_app.rb', __FILE__)
 
+require 'forwardable'
