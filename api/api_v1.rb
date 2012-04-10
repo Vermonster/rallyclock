@@ -23,12 +23,9 @@ module RallyClock
 
     resource :users do
       post nil do
-        u = User.new(email: params[:email], password: params[:password], username: params[:username])
-        if u.valid?
-          u.save
-        else
-          error!(u.errors.full_messages, 400)
-        end
+        error!('Username already taken', 422) if User.first(username: params[:username])
+        error!('Email already taken', 422)    if User.first(email: params[:email])
+        User.create(email: params[:email], password: params[:password], username: params[:username])
       end
     end
 

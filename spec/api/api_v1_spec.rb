@@ -79,18 +79,25 @@ describe RallyClock::API do
 
     describe "users" do
       context "POST /users" do
-        let!(:existing_user) { User.create(email: "descartes@cogito.ergo.sum", password: "foobar", username: "rene" }
+        let!(:existing_user) { User.create(email: "descartes@cogito.ergo.sum", password: "foobar", username: "rene") }
+
         it "creates a user" do
           expect do
             post "/api/v1/users", { email: 'asdlfkj@foo.com', password: 'apples', username: 'sdfkljsd' }
-          end.to change { User.count }.from(2).to(3)
+          end.to change { User.count }.from(3).to(4)
           last_response.status.should eq(201)
 
           User.first(email: u.email).should_not be_nil
         end
 
-        it "returns 401 if the Username or Email has been taken" do
-          pending
+        it "returns 422 if the Email has been taken" do
+          post '/api/v1/users', { email: 'descartes@cogito.ergo.sum', password: "foo", username: "des" } 
+          last_response.status.should eq(422)
+        end
+
+        it "returns 422 if the Username has been taken" do
+          post '/api/v1/users', { email: 'des@cogito.ergo.sum', password: "foo", username: "rene" } 
+          last_response.status.should eq(422)
         end
       end
     end
