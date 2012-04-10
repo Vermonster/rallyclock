@@ -8,6 +8,7 @@ Sequel.migration do
       foreign_key :user_id, :users
       DateTime :created_at
       DateTime :updated_at
+      foreign_key :project_id, :projects
     end
   end
 
