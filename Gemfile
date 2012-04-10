@@ -9,7 +9,9 @@ gem "pg", "~> 0.13"
 gem "heroku", "~> 2.24"
 gem "foreman", "~> 0.41"
 gem "pry", "~> 0.9"
+gem 'pry-remote'
 gem "database_cleaner", "~> 0.7"
+
 gem "bcrypt-ruby", "~> 3.0", :require => 'bcrypt'
 gem "activesupport", "~> 3.2", :require => 'active_support'
 gem 'grape-rabl', '0.0.4'
