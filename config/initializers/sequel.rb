@@ -13,5 +13,6 @@ class Sequel::Model
     self.updated_at = Time.now
     super
   end
+  undef each
 end
 
