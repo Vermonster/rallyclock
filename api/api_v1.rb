@@ -127,6 +127,28 @@ module RallyClock
       end
     end
     
+    resource :entries do
+      before { authenticate! }
 
+      post nil do
+        current_user.add_entry Entry.new(params[:entry])
+      end
+
+      segment '/:entry_id' do
+        before do
+          error!("Entry Not Found", 404) unless @entry = Entry.first(id: params[:entry_id])
+          error!("Unauthorized", 401) unless current_user.entries.include?(@entry)
+        end
+
+        put nil do
+          @entry.update(params[:entry]) 
+        end
+
+        delete nil do
+          @entry.destroy
+        end
+
+      end
+    end
   end
 end

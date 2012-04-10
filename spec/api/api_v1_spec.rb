@@ -21,8 +21,65 @@ describe RallyClock::API do
       end
     end
 
+    describe "entries" do
+      context "creating" do
+        context "POST /entries" do
+          it "should create an entry for the submitting user" do
+            post '/api/v1/entries', { t: u.api_key, entry: { note: "Slurm", time: 420 } }
+            last_response.status.should == 201
+            u.entries.should_not be_empty
+          end
+        end
+      end
+
+      context "update and delete" do
+        let!(:entry) { Entry.create(note: "SLURM!", time: 420, user_id: u.id) }
+        let!(:bono_entry) { Entry.create(note: "Sunday, Bloody Sunday.", time: 420, user_id: bono.id) }
+
+        context "PUT /entries/:id" do
+          it "should update the given entry with the new information" do
+            put "/api/v1/entries/#{entry.id}", { t: u.api_key, entry: { note: "Slurm", time: 420 } }
+            last_response.status.should == 200
+            u.entries_dataset[entry.id].note.should == "Slurm"
+            u.entries_dataset[entry.id].time.should == 420
+          end
+
+          it "should reject updating an entry that does not exist -- 404" do
+            put "/api/v1/entries/#{bono_entry.id}", { t: u.api_key, entry: { note: "Slurm", time: 420 } }
+            last_response.status.should == 401
+          end
+
+          it "should reject updating another users entry -- 401" do
+            put "/api/v1/entries/123091230", { t: u.api_key, entry: { note: "Slurm", time: 420 } }
+            last_response.status.should == 404
+          end
+        end
+
+        context "DELETE /entries/:id" do
+          it "should delete the given entry" do
+            delete "/api/v1/entries/#{entry.id}", { t: u.api_key }
+            last_response.status.should == 200
+            u.entries.should be_empty
+          end
+
+          it "refuses to delete an entry not owned by the user -- 401" do
+            delete "/api/v1/entries/#{bono_entry.id}", { t: u.api_key }
+            last_response.status.should == 401
+            bono.entries.should_not be_empty
+          end
+
+          it "refuses to delete an entry that does not exist -- 404" do
+            delete "/api/v1/entries/123091230", { t: u.api_key }
+            last_response.status.should == 404
+            u.entries.should_not be_empty
+          end
+        end
+      end
+    end
+
     describe "users" do
       context "POST /users" do
+        let!(:existing_user) { User.create(email: "descartes@cogito.ergo.sum", password: "foobar", username: "rene" }
         it "creates a user" do
           expect do
             post "/api/v1/users", { email: 'asdlfkj@foo.com', password: 'apples', username: 'sdfkljsd' }
@@ -94,7 +151,7 @@ describe RallyClock::API do
           Group.count.should eq(1)
         end
       end
-      
+
       describe "group members" do
         context "POST /groups/:id/users" do
           it "adds a user to the group" do
@@ -163,12 +220,12 @@ describe RallyClock::API do
             client.reload
             client.name.should eq('Bioware')
           end
-          
+
           it "refuses to update for a non-admin -- returns 401" do
             put "/api/v1/groups/#{g.id}/clients/#{client.id}", { t: bono.api_key, client: { name: 'Bioware'}}
             last_response.status.should eq(401)
           end
-          
+
           it "refuses to update a non-existant client -- returns 404" do
             put "/api/v1/groups/#{g.id}/clients/#{client.id+1}", {t: u.api_key, client: {name: 'Bioware'}}
             last_response.status.should eq(404)
@@ -180,12 +237,12 @@ describe RallyClock::API do
             delete "/api/v1/groups/#{g.id}/clients/#{client.id}", {t: u.api_key}
             last_response.status.should eq(200)
           end
-          
+
           it "refuses to destroy a non-existent client -- returns 404" do
             delete "/api/v1/groups/#{g.id}/clients/#{client.id+1}", {t: u.api_key}
             last_response.status.should eq(404)
           end
-          
+
           it "refuses to destroy for a non-admin -- returns 401" do
             delete "/api/v1/groups/#{g.id}/clients/#{client.id}", {t: bono.api_key}
             last_response.status.should eq(401)
@@ -195,7 +252,7 @@ describe RallyClock::API do
         describe "client projects" do
           let!(:client) { Client.create(name: "Cyberdyne", group_id: g.id) }
           let!(:project) { Project.create(name: "Skynet", client_id: client.id) }
-          
+
           context "POST group/:group_id/clients/:client_id/projects" do
             it "adds a project to a client -- returns 201" do
               post "/api/v1/groups/#{g.id}/clients/#{client.id}/projects", { name: "T-X" , t: u.api_key } 
@@ -222,12 +279,12 @@ describe RallyClock::API do
               project.reload
               project.name.should eq('T-1000')
             end
-            
+
             it "refuses to update for a non-admin -- returns 401" do
               put "/api/v1/groups/#{g.id}/clients/#{client.id}/projects/#{project.id}", { t: bono.api_key, project: { name: 'T-1000'}}
               last_response.status.should eq(401)
             end
-            
+
             it "refuses to update a non-existant client -- returns 404" do
               put "/api/v1/groups/#{g.id}/clients/#{client.id}/projects/#{project.id+1}", {t: u.api_key, project: {name: 'T-1000'}}
               last_response.status.should eq(404)
@@ -239,12 +296,12 @@ describe RallyClock::API do
               delete "/api/v1/groups/#{g.id}/clients/#{client.id}/projects/#{project.id}", {t: u.api_key}
               last_response.status.should eq(200)
             end
-            
+
             it "refuses to destroy a non-existent project -- returns 404" do
               delete "/api/v1/groups/#{g.id}/clients/#{client.id}/projects/#{project.id+1}", {t: u.api_key}
               last_response.status.should eq(404)
             end
-            
+
             it "refuses to destroy for a non-admin -- returns 401" do
               delete "/api/v1/groups/#{g.id}/clients/#{client.id}", {t: bono.api_key}
               last_response.status.should eq(401)
