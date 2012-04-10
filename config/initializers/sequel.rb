@@ -13,6 +13,15 @@ class Sequel::Model
     self.updated_at = Time.now
     super
   end
+
+  def uri_for(version)
+    URI.join(ENV["SERVER"], RallyClock::API_v1.prefix, version, rel_path).to_s
+  end
+
+  def rel_path
+    raise 'abstract'
+  end
+
   undef each
 end
 

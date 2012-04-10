@@ -9,6 +9,10 @@ class User < Sequel::Model
 
   set_allowed_columns :username, :password, :email, :api_key
 
+  def rel_path
+    "users/#{username}"
+  end
+
   def before_create
     encrypt_password
     generate_api_key

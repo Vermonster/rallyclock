@@ -6,6 +6,10 @@ class Group < Sequel::Model
 
   add_association_dependencies :memberships => :destroy
 
+  def rel_path
+    "groups/#{id}"
+  end
+
   def validate
     super
     validates_presence :name

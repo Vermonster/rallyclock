@@ -2,6 +2,10 @@ class Client < Sequel::Model
   one_to_many :projects
   many_to_one :group
 
+  def rel_path
+    "clients/#{account}"
+  end
+
   def validate
     super
     validates_presence [:name, :account]

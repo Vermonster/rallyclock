@@ -1,7 +1,14 @@
 class Project < Sequel::Model
+  extend Forwardable
+
   many_to_one :client
 
+  def rel_path
+    "projects/#{code}"
+  end
+
   delegate [:group] => :client
+
 
   def validate
     super

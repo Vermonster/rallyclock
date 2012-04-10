@@ -18,6 +18,11 @@ module RallyClock
       end
     end
 
+    before do
+      @version = 'v1'
+    end
+
+
     resource :system do
       desc "Returns pong."
       get :ping do
@@ -26,6 +31,9 @@ module RallyClock
 
       get :pang, :rabl => 'pang' do
         #this line intentionally blank
+      end
+
+      get :test, :rabl => 'entry' do
       end
     end
 
@@ -36,6 +44,12 @@ module RallyClock
         u = User.new(email: params[:email], password: params[:password], username: params[:username])
         error!('Invalid Username or Email', 403) unless u.valid?
         u.save
+      end
+
+      get ':username', :rabl => 'user' do
+        @user = User.first(username: params[:username])
+        error!('User not found', 404) unless @user
+        error!('Unauthorized', 401) unless @user.api_key == params[:t]
       end
     end
 
@@ -61,13 +75,16 @@ module RallyClock
 
       segment "/:group_id" do
         before do
-          @group = current_user.groups_dataset[params[:group_id].to_i]
-          error!("Unauthorized", 401) unless @group && @group.admin?(current_user)
+          @group = Group[params[:group_id].to_i]
+          error!("Group Not Found", 404) unless @group
+          error!("Unauthorized", 401)    unless @group.admin?(current_user)
         end
         
         delete nil do
           @group.destroy
         end
+
+        get(nil, :rabl => 'group') {}
 
         resource :users do
           before do
@@ -107,6 +124,9 @@ module RallyClock
               @client.destroy 
             end
 
+            get(nil, :rabl => 'client') {}
+
+
             resource :projects do
               post nil do
                 error!("Project Already Exists", 422) if @client.projects_dataset.first(code: params[:project][:code])
@@ -125,6 +145,8 @@ module RallyClock
                 delete nil do
                   @project.destroy 
                 end
+
+                get(nil, :rabl => 'project') {}
               end
             end
           end
@@ -152,7 +174,8 @@ module RallyClock
         delete nil do
           @entry.destroy
         end
-
+      
+        get(nil, :rabl => 'entry') {}
       end
     end
   end

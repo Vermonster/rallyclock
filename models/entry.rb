@@ -1,7 +1,16 @@
 class Entry < Sequel::Model
-  many_to_one :user
+  extend Forwardable
 
-  set_allowed_columns :time, :note, :user_id
+  many_to_one :user
+  many_to_one :project
+
+  delegate [:client, :group] => :project 
+
+  #set_allowed_columns :time, :note, :user_id, :project_id
+
+  def rel_path
+    "entries/#{id}"
+  end
 
   def validate
     super
