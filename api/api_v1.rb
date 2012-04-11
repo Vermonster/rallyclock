@@ -1,7 +1,7 @@
 module RallyClock
   class API_v1 < Grape::API
     use Rack::Config do |env|
-      env['api.tilt.root'] = File.expand_path(File.join('rabl/'))
+      env['api.tilt.root'] = File.expand_path("../../rabl", __FILE__)
     end
 
     version 'v1', :using => :path, :vendor => 'rallyclock', :format => :json
