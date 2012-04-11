@@ -22,18 +22,28 @@ module RallyClock
       @version = 'v1'
     end
 
-
     resource :system do
       desc "Returns pong."
       get :ping do
         "pong"
       end
+    end
 
-      get :pang, :rabl => 'pang' do
-        #this line intentionally blank
+    resource :me do
+      get nil, :rabl => 'me/user' do
+        @user = current_user
       end
 
-      get :test, :rabl => 'entry' do
+      resource :projects do
+        get nil, :rabl => 'me/projects' do
+          @projects = Project.filter(:client_id => current_user.groups.map(&:clients).flatten.map(&:id)).all
+        end
+      end
+
+      resource :entries do
+        get nil, :rabl => 'me/entries' do
+          @entries = current_user.entries
+        end
       end
     end
 
@@ -44,12 +54,6 @@ module RallyClock
         u = User.new(email: params[:email], password: params[:password], username: params[:username])
         error!('Invalid Username or Email', 403) unless u.valid?
         u.save
-      end
-
-      get ':username', :rabl => 'user' do
-        @user = User.first(username: params[:username])
-        error!('User not found', 404) unless @user
-        error!('Unauthorized', 401) unless @user.api_key == params[:t]
       end
     end
 
@@ -84,7 +88,7 @@ module RallyClock
           @group.destroy
         end
 
-        get(nil, :rabl => 'group') {}
+        get(nil, :rabl => 'groups/show') {}
 
         resource :users do
           before do
@@ -105,6 +109,22 @@ module RallyClock
           end
         end
 
+        resource :entries do
+          get nil, :rabl => 'entries/index' do
+            @entries = Project.filter(client_id: @group.clients_dataset.map(:id)).map(&:entries).flatten
+          end
+
+          segment "/:entry_id" do
+            before do
+              @entry = Entry[params[:entry_id].to_i]
+              error!("Entry Not Found", 404) unless @entry
+              error!("Unauthorized", 401) unless @group.users_dataset[@entry.user_id]
+            end
+            
+            get(nil, :rabl => 'entries/show') {}
+          end
+        end
+
         resource :clients do
           post nil do
             error!("Client Already Exists", 422) if @group.clients_dataset.first(account: params[:client][:account])
@@ -113,7 +133,7 @@ module RallyClock
 
           segment "/:client_account" do
             before do
-              error!("Client Does Not Exist", 404) unless @client = @group.clients_dataset.first(account: params[:client_account])
+              error!("Client Not Found", 404) unless @client = @group.clients_dataset.first(account: params[:client_account])
             end
           
             put nil do
@@ -124,8 +144,23 @@ module RallyClock
               @client.destroy 
             end
 
-            get(nil, :rabl => 'client') {}
+            get(nil, :rabl => 'clients/show') {}
 
+            resource :entries do
+              get nil, :rabl => 'entries/index' do
+                @entries = Entry.filter(project_id: @client.projects_dataset.map(:id)).all
+              end
+
+              segment "/:entry_id" do
+                before do
+                  @entry = Entry[params[:entry_id].to_i]
+                  error!("Entry Not Found", 404) unless @entry
+                  error!("Unauthorized", 401) unless @client.projects_dataset[@entry.project_id]
+                end
+                
+                get(nil, :rabl => 'entries/show') {}
+              end
+            end
 
             resource :projects do
               post nil do
@@ -146,7 +181,7 @@ module RallyClock
                   @project.destroy 
                 end
 
-                get(nil, :rabl => 'project') {}
+                get(nil, :rabl => 'projects/show') {}
               end
             end
           end
