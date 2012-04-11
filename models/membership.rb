@@ -4,6 +4,7 @@ class Membership < Sequel::Model
 
   def validate
     super
+    validates_presence [:user_id, :group_id]
     validates_unique [:user_id, :group_id]
   end
 

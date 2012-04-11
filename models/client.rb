@@ -1,5 +1,6 @@
 class Client < Sequel::Model
   one_to_many :projects
+  many_to_many :entries, :join_table => :projects
   many_to_one :group
 
   def rel_path
@@ -8,7 +9,7 @@ class Client < Sequel::Model
 
   def validate
     super
-    validates_presence [:name, :account]
+    validates_presence [:name, :account, :group_id]
     validates_unique [:group_id, :account, :name]
     validates_format /^\w+$/, :account
   end

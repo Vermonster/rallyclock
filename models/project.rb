@@ -2,6 +2,7 @@ class Project < Sequel::Model
   extend Forwardable
 
   many_to_one :client
+  one_to_many :entries
 
   def rel_path
     "projects/#{code}"
@@ -12,7 +13,7 @@ class Project < Sequel::Model
 
   def validate
     super
-    validates_presence [:name, :code]
+    validates_presence [:name, :code, :client_id]
     validates_unique [:name, :code, :client_id]
 
     validates_format /^\w+$/, :code
