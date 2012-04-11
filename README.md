@@ -3,57 +3,64 @@ Rallyclock
 
 A [Grape](http://github.com/intridea/grape) API mounted on RACK.
 
-### API (v.0.1.4)
-##### All calls preceded by /api/&ltversion&gt
-* GET /system/ping (sanity check)
-* POST /users (creates new users)
-* POST /sessions
-* POST /groups
-* DELETE /groups/:id
-* POST /groups/:group_id/users
-* PUT /groups/:group_id/users/:username
-* DELETE /groups/:group_id/users/:username
-* POST /groups/:group_id/clients
-* PUT /groups/:group_id/clients/:id
-* DELETE /groups/:group_id/clients/:id
-* POST /groups/:group_id/clients/:client_id/projects
-* PUT /groups/:group_id/clients/:client_id/projects/:id
-* DELETE /groups/:group_id/clients/:client_id/projects/:id
+### API (v.0.2.3)
+##### All calls preceded by /api/v1
 
-TODOS:
-both post and put should pass all attributes  
-actions to activate/archive clients and projects  
-missing actions  
+(Sanity Check)
+GET /system/ping
 
-  * GET /me
-  * GET /groups/:id
-  * PUT /groups/:id
-  * GET /groups/:group_id/users
-  * GET /groups/:group_id/users/:id
-  * GET /groups/:group_id/clients
-  * GET /groups/:group_id/clients/:id
-  * GET /groups/:group_id/clients/:client_id/projects
-  * GET /groups/:group_id/clients/:client_id/projects/:id
-Tasks  
-Invoices  
-Reports  
-Timers (proposed)  
+(You)
+GET /meGET /me/projects
+GET /me/entries
 
-  * POST /timer
-  * DELETE /timer (results in an entry)
-Entries (proposed)  
+(Registration)
+POST /users
 
-  * GET /today
-  * GET /entries/YYYYMMDD
-  * GET /entries?from=YYYYMMDD&to=YYYYMMDD (me)
-  * GET /entries?from=YYYYMMDD&to=YYYYMMDD&active=true&billable=true&user_id=1,2,3 (admin)
-  * POST /entries
-  * POST /entries/import (batch import)
-  * PUT /entries/:id
-  * DELETE /entries/:id
-  
-Client Contacts  
+(U+P Auth)
+POST /sessions
 
-Are the URLs too long? ("/clients", "/projects", "/users")  
+(Groups)
+GET /groups/:id
+POST /groups
+DELETE /groups
 
+(Members)
+POST /groups/:id/users
+PUT /groups/:id/users/:username
 
+(Clients)
+GET /groups/:id/clients/:account
+POST /groups/:id/clients
+PUT /groups/:id/clients/:account
+DELETE /groups/:id/clients/:account
+
+(Projects)
+GET /groups/:id/clients/:account/projects/:code
+POST groups/:id/clients/:account/projects
+PUT groups/:id/clients/:account/projects/:code
+DELETE groups/:id/clients/:account/projects/:code
+
+(Entries)
+GET groups/:id/entries
+GET groups/:id/entries/:id
+GET groups/:id/clients/:account/entries
+GET groups/:id/clients/:account/entries/:id
+
+TODO
+GET /me/entries/:id
+GET /me/entries?from=YYYYMMDD&to=YYYMMDD
+DELETE /groups/:id/users/:username (delete membership)
+GET /groups/:id/clients (?)
+GET /groups/:id/clients/:account/projects (?)
+Make sure puts and posts allow for all attributes
+Actions to activate/archive clients and projects
+Instead of 'groups/:id' maybe we should a group codename start the url so that we can have nice things like "curl http://rallyclock.com/api/v1/vermonster/clients/cyberdine/entries"
+*FIX ENTRIES POST ENDPOINT* -- Creating entries doesn't tie them to a project
+*ADD DATE TO ENTRY*
+
+API_v1 (the second coming)
+Tasks
+Invoices
+Reports
+Timers
+Client Contacts
