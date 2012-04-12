@@ -209,6 +209,25 @@ describe RallyClock::API do
             last_response.status.should eq(401)
           end
         end
+
+        context "DELETE /groups/:group_id/users/:username" do
+          it "removes a user from the group" do
+            g.users.should include(bono)
+            delete "/api/v1/groups/#{g.id}/users/#{bono.username}", { t: u.api_key } 
+            last_response.status.should eq(200)
+            bono.memberships.should be_empty
+          end
+
+          it "returns 404 if the user doesn't exist" do
+            delete "/api/v1/groups/#{g.id}/users/asldfkalsjdhflkajsdhfalskjdfhaskdjfh", { t: u.api_key }
+            last_response.status.should eq(404)
+          end
+
+          it "returns 401 if the user is not an admin" do
+            delete "/api/v1/groups/#{g.id}/users/#{u.username}", { t: bono.api_key }
+            last_response.status.should eq(401)
+          end
+        end
       end
 
       describe "group clients" do

@@ -32,6 +32,21 @@ class User < Sequel::Model
     membership_for(group) && membership_for(group).owner?
   end
 
+  # options:
+  # to=YYYYMMDD
+  # from=YYYMMDD
+  def filter_entries(options={})
+    if options.reject{|k,v|v.nil?}.empty?
+      entries
+    elsif options[:to] && options[:from]
+      entries_dataset.filter("date <= :to AND date >= :from", to: options[:to], from: options[:from]).all
+    elsif options[:to]
+      entries_dataset.filter("date <= :to", to: options[:to]).all
+    elsif options[:from]
+      entries_dataset.filter("date >= :from", from: options[:from]).all
+    end
+  end
+
   def validate
     super
 

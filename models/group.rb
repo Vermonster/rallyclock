@@ -38,7 +38,7 @@ class Group < Sequel::Model
   end
 
   def remove_member(user)
-    memberships.first(user_id: user.id).destroy
+    memberships_dataset.first(user_id: user.id).destroy
   end
 end
 

@@ -42,7 +42,16 @@ module RallyClock
 
       resource :entries do
         get nil, :rabl => 'me/entries' do
-          @entries = current_user.entries
+          @entries = current_user.filter_entries(to: params[:to], 
+                                             from: params[:from])
+        end
+
+        segment "/:entry_id" do
+          before do
+            error!("Entry Not Found", 404) unless @entry = current_user.entries_dataset[params[:entry_id].to_i]
+          end
+
+          get(nil, :rabl => 'me/entry') {}
         end
       end
     end
@@ -128,20 +137,25 @@ module RallyClock
         resource :users do
           before do
             error!("Unauthorized", 401)    unless @group.admin?(current_user)
-            @user = User.filter({email: params[:email]}|{username: params[:username]}).first
-            error!("User does not exist", 404) unless @user
           end
 
           post nil do
             @group.add_member(@user)
           end
 
-          put ":username" do
-            @group.memberships_dataset.first(user_id: @user.id).update(params[:user])
-          end
+          segment "/:username" do
+            before do
+              @user = @group.users_dataset.first(username: params[:username])
+              error!("User does not exist", 404) unless @user
+            end
 
-          delete ":username" do
-            @group.remove_member(@user)
+            put nil do
+              @group.memberships_dataset.first(user_id: @user.id).update(params[:user])
+            end
+
+            delete nil do
+              @group.remove_member(@user)
+            end
           end
         end
 

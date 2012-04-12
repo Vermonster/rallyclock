@@ -13,6 +13,8 @@ GET /system/ping
 GET /me  
 GET /me/projects  
 GET /me/entries  
+GET /me/entries/:id  
+GET /me/entries?from=YYYYMMDD&to=YYYMMDD  
 
 (Registration)  
 POST /users  
@@ -28,6 +30,7 @@ DELETE /groups
 (Members)  
 POST /groups/:id/users  
 PUT /groups/:id/users/:username  
+DELETE /groups/:id/users/:username (delete membership)  
 
 (Clients)  
 GET /groups/:id/clients/:account  
@@ -50,13 +53,9 @@ GET groups/:id/clients/:account/entries
 GET groups/:id/clients/:account/entries/:id  
 
 TODO 
-GET /me/entries/:id  
-GET /me/entries?from=YYYYMMDD&to=YYYMMDD  
-DELETE /groups/:id/users/:username (delete membership)  
 GET /groups/:id/clients (?)  
 GET /groups/:id/clients/:account/projects (?)  
 Make sure puts and posts allow for all attributes  
-Actions to activate/archive clients and projects  
 Instead of 'groups/:id' maybe we should a group codename start the url so that we can have nice things like "curl http://rallyclock.com/api/v1/vermonster/clients/cyberdine/entries"  
 
 API_v1 (the second coming)  
