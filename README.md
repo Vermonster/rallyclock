@@ -50,7 +50,9 @@ POST groups/:id/clients/:account/projects
 PUT groups/:id/clients/:account/projects/:code  
 DELETE groups/:id/clients/:account/projects/:code  
 
-(* Entries)  
+(* Entries) 
+GET groups/:id/users/entries
+GET groups/:id/users/entries?from=YYYYMMDD&to=YYYYMMDD
 GET groups/:id/clients/:account/entries
 GET groups/:id/clients/:account/entries?from=YYYYMMDD&to=YYYYMMDD
 GET groups/:id/clients/:account/entries/:id  
@@ -60,7 +62,8 @@ GET groups/:id/projects/:code/entries/:id
 PUT groups/:id/projects/:code/entries/:id
 DELETE groups/:id/projects/:code/entries/:id
 
-API_v1 (the second coming)  
+API_v1 (the second coming/electric boogaloo/judgment day) 
+Project Assignments
 Tasks  
 Invoices  
 Reports  

@@ -167,6 +167,12 @@ module RallyClock
             delete nil do
               @group.remove_member(@user)
             end
+
+            resource :entries do
+              get nil, :rabl => 'entries/index' do
+                @entries = @user.filter_entries(to: params[:to], from: params[:from])
+              end
+            end
           end
         end
 
