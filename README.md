@@ -58,7 +58,6 @@ GET /groups/:id/clients/:account/projects (?)
 Make sure puts and posts allow for all attributes  
 Actions to activate/archive clients and projects  
 Instead of 'groups/:id' maybe we should a group codename start the url so that we can have nice things like "curl http://rallyclock.com/api/v1/vermonster/clients/cyberdine/entries"  
-*ADD DATE TO ENTRY*  
 
 API_v1 (the second coming)  
 Tasks  

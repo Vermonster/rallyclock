@@ -5,8 +5,8 @@ Sequel.migration do
       String :name
       String :description, :text => true
       String :code
-      TrueClass :active
-      TrueClass :billable
+      TrueClass :active, :default => true
+      TrueClass :billable, :default => true
       foreign_key :client_id, :clients
       DateTime :created_at
       DateTime :updated_at

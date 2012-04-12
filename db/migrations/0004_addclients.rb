@@ -5,7 +5,7 @@ Sequel.migration do
       String :name
       String :account
       String :description, :text => true
-      TrueClass :active
+      TrueClass :active, :default => true
       foreign_key :group_id, :groups
       DateTime :created_at
       DateTime :updated_at
