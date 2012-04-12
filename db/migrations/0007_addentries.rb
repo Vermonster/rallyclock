@@ -4,8 +4,9 @@ Sequel.migration do
       primary_key :id
       String :note, :text => true
       Integer :time
-      TrueClass :billable
+      TrueClass :billable, :default => true
       foreign_key :user_id, :users
+      Date :date
       DateTime :created_at
       DateTime :updated_at
       foreign_key :project_id, :projects

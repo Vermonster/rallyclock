@@ -7,6 +7,12 @@ class Entry < Sequel::Model
   delegate [:client, :group] => :project 
 
   #set_allowed_columns :time, :note, :user_id, :project_id
+  
+  def before_create
+    self.date ||= Date.today
+    super
+  end
+
 
   def rel_path
     "entries/#{id}"
