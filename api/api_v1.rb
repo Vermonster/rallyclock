@@ -185,6 +185,10 @@ module RallyClock
             error!("Unauthorized", 401)    unless @group.admin?(current_user)
           end
 
+          get nil, :rabl => 'clients/index' do
+            @clients = @group.clients
+          end
+
           post nil do
             error!("Client Already Exists", 422) if @group.clients_dataset.first(account: params[:client][:account])
             @group.add_client Client.new(params[:client])
@@ -222,6 +226,10 @@ module RallyClock
             end
 
             resource :projects do
+              get nil, :rabl => 'projects/index' do
+                @projects = Project.filter(:client_id => @group.clients_dataset.map(:id))
+              end
+
               post nil do
                 error!("Project Already Exists", 422) if @client.projects_dataset.first(code: params[:project][:code])
                 @client.add_project Project.new(params[:project])

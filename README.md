@@ -33,12 +33,14 @@ PUT /groups/:id/users/:username
 DELETE /groups/:id/users/:username (delete membership)  
 
 (Clients)  
-GET /groups/:id/clients/:account  
+GET /groups/:id/clients
+GET /groups/:id/clients/:account
 POST /groups/:id/clients  
 PUT /groups/:id/clients/:account  
 DELETE /groups/:id/clients/:account  
 
 (Projects)  
+GET /groups/:id/clients/:account/projects
 GET /groups/:id/clients/:account/projects/:code  
 POST groups/:id/clients/:account/projects  
 PUT groups/:id/clients/:account/projects/:code  
@@ -53,7 +55,6 @@ GET groups/:id/clients/:account/entries
 GET groups/:id/clients/:account/entries/:id  
 
 TODO 
-GET /groups/:id/clients (?)  
 GET /groups/:id/clients/:account/projects (?)  
 Make sure puts and posts allow for all attributes  
 Instead of 'groups/:id' maybe we should a group codename start the url so that we can have nice things like "curl http://rallyclock.com/api/v1/vermonster/clients/cyberdine/entries"  

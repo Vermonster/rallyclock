@@ -1,2 +1,2 @@
-object @client
+collection @clients
 attributes :name, :account

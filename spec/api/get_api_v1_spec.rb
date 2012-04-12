@@ -33,6 +33,15 @@ describe "Read API" do
         get "/api/v1/groups/#{vermonster.id}", {t: brian.api_key}
         last_response.status.should == 200
       end
+
+      context "clients" do
+        it "returns all its clients" do
+          get "/api/v1/groups/#{vermonster.id}/clients", {t: brian.api_key}
+          last_response.status.should eq(200)
+          content = JSON.parse(last_response.body)
+          content.length.should eq(1)
+        end
+      end
     end
 
     context "Client" do 
@@ -49,6 +58,15 @@ describe "Read API" do
       it "should respond with appropriate JSON when you try to get a resource" do
         get "/api/v1/groups/#{vermonster.id}/clients/#{koko.account}", {t: brian.api_key}
         last_response.status.should == 200
+      end
+
+      context "projects" do
+        it "returns all its projects" do
+          get "/api/v1/groups/#{vermonster.id}/clients/#{koko.account}/projects", {t: brian.api_key}
+          last_response.status.should eq(200)
+          content = JSON.parse(last_response.body)
+          content.length.should eq(1)
+        end
       end
     end
 

@@ -1,2 +1,2 @@
-object @project
+collection @projects
 attributes :name, :code
