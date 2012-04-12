@@ -59,7 +59,7 @@ module RallyClock
     resource :users do
       post nil do
         error!('Username already taken', 422) if User.first(username: params[:username])
-        error!('Email already taken', 422)    if User.first(email: params[:email])
+        error!('Email already taken', 422) if User.first(email: params[:email])
         u = User.new(email: params[:email], password: params[:password], username: params[:username])
         error!('Invalid Username or Email', 403) unless u.valid?
         u.save
@@ -93,12 +93,12 @@ module RallyClock
         end
         
         delete nil do
-          error!("Unauthorized", 401)    unless @group.admin?(current_user)
+          error!("Unauthorized", 401) unless @group.admin?(current_user)
           @group.destroy
         end
 
         get nil, :rabl => 'groups/show' do
-          error!("Unauthorized", 401)    unless @group.admin?(current_user)
+          error!("Unauthorized", 401) unless @group.admin?(current_user)
         end
 
         resource :projects do
@@ -110,6 +110,10 @@ module RallyClock
             end
             
             resource :entries do
+              get nil, :rabl => 'entries/index' do
+                @entries = @project.filter_entries(to: params[:to], from: params[:from])
+              end
+
               post nil do
                 current_user.add_entry Entry.new(params[:entry].merge(project_id: @project.id))
               end
@@ -182,7 +186,7 @@ module RallyClock
 
         resource :clients do
           before do
-            error!("Unauthorized", 401)    unless @group.admin?(current_user)
+            error!("Unauthorized", 401) unless @group.admin?(current_user)
           end
 
           get nil, :rabl => 'clients/index' do
@@ -211,7 +215,7 @@ module RallyClock
 
             resource :entries do
               get nil, :rabl => 'entries/index' do
-                @entries = Entry.filter(project_id: @client.projects_dataset.map(:id)).all
+                @entries = @client.filter_entries(to: params[:to], from: params[:from])
               end
 
               segment "/:entry_id" do

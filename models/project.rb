@@ -5,13 +5,29 @@ class Project < Sequel::Model
   one_to_many :entries
   
   add_association_dependencies :entries => :destroy
+  
+  delegate [:group] => :client
 
   def rel_path
     "projects/#{code}"
   end
+  
+  # options:
+  # to=YYYYMMDD
+  # from=YYYMMDD
+  def filter_entries(options={})
+    entries = Entry.filter(project_id: id).all
 
-  delegate [:group] => :client
-
+    if options.reject{|k,v|v.nil?}.empty?
+      entries
+    elsif options[:to] && options[:from]
+      entries.select {|e| e.date <= Date.parse(options[:to]) && e.date >= Date.parse(options[:from])}
+    elsif options[:to]
+      entries.select {|e| e.date <= Date.parse(options[:to])}
+    elsif options[:from]
+      entries.select {|e| e.date >= Date.parse(options[:from])}
+    end
+  end
 
   def validate
     super

@@ -3,7 +3,7 @@ Rallyclock
 
 A [Grape](http://github.com/intridea/grape) API mounted on RACK.
 
-### API (v.0.2.3)
+### API (v.0.2.11)
 ##### All calls preceded by /api/v1
 
 (Sanity Check)  
@@ -55,7 +55,9 @@ GET groups/:id/clients/:account/entries
 GET groups/:id/clients/:account/entries/:id  
 
 TODO 
-GET /groups/:id/clients/:account/projects (?)  
+GET groups/:id/projects/:code/entries?from=YYYYMMDD&to=YYYYMMDD
+GET groups/:id/clients/:account/entries?from=YYYYMMDD&to=YYYYMMDD
+
 Make sure puts and posts allow for all attributes  
 Instead of 'groups/:id' maybe we should a group codename start the url so that we can have nice things like "curl http://rallyclock.com/api/v1/vermonster/clients/cyberdine/entries"  
 

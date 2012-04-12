@@ -130,6 +130,86 @@ describe "Read API" do
         get "/api/v1/groups/#{vermonster.id}/clients/#{koko.account}/entries/#{entry.id}", {t: joe.api_key}
         last_response.status.should eq(401)
       end
+      
+      describe "GET /api/v1/groups/:group_id/clients/entries?from=YYYYMMDD&to=YYYYMMDD" do
+        before do
+          Entry.create(note: 'entry #3', time: 10, date: '2011-12-31', project_id: my_koko.id, user_id: joe.id) 
+          Entry.create(note: 'entry #4', time: 10, date: '2012-01-01', project_id: my_koko.id, user_id: joe.id) 
+          Entry.create(note: 'entry #5', time: 10, date: '2012-02-01', project_id: my_koko.id, user_id: joe.id) 
+          Entry.create(note: 'entry #2', time: 10, date: '2012-03-01', project_id: my_koko.id, user_id: joe.id) 
+          
+          # entries available by date
+          # 1. Today (It works)
+          # 2. 2012-03-01
+          # 5. 2012-02-01
+          # 4. 2012-01-01
+          # 3. 2011-12-31
+        end
+
+        it "returns the correct entries using from" do
+          get "/api/v1/groups/#{vermonster.id}/clients/#{koko.account}/entries?from=20120201", { t: brian.api_key }
+          last_response.status.should eq(200)
+
+          content = JSON.parse(last_response.body)
+          content.length.should eq(3)
+        end
+        
+        it "returns the correct entries using to" do
+          get "/api/v1/groups/#{vermonster.id}/clients/#{koko.account}/entries?to=20120131", { t: brian.api_key }
+          last_response.status.should eq(200)
+
+          content = JSON.parse(last_response.body)
+          content.length.should eq(2)
+        end
+        
+        it "returns the correct entries using from and to" do
+          get "/api/v1/groups/#{vermonster.id}/clients/#{koko.account}/entries?from=20120101&to=20120201", { t: brian.api_key }
+          last_response.status.should eq(200)
+
+          content = JSON.parse(last_response.body)
+          content.length.should eq(2)
+        end
+      end
+      
+      describe "GET /api/v1/groups/:group_id/projects/:code/entries?from=YYYYMMDD&to=YYYYMMDD" do
+        before do
+          Entry.create(note: 'entry #3', time: 10, date: '2011-12-31', project_id: my_koko.id, user_id: joe.id) 
+          Entry.create(note: 'entry #4', time: 10, date: '2012-01-01', project_id: my_koko.id, user_id: joe.id) 
+          Entry.create(note: 'entry #5', time: 10, date: '2012-02-01', project_id: my_koko.id, user_id: joe.id) 
+          Entry.create(note: 'entry #2', time: 10, date: '2012-03-01', project_id: my_koko.id, user_id: joe.id) 
+          
+          # entries available by date
+          # 1. Today (It works)
+          # 2. 2012-03-01
+          # 5. 2012-02-01
+          # 4. 2012-01-01
+          # 3. 2011-12-31
+        end
+
+        it "returns the correct entries using from" do
+          get "/api/v1/groups/#{vermonster.id}/projects/#{my_koko.code}/entries?from=20120201", { t: brian.api_key }
+          last_response.status.should eq(200)
+
+          content = JSON.parse(last_response.body)
+          content.length.should eq(3)
+        end
+        
+        it "returns the correct entries using to" do
+          get "/api/v1/groups/#{vermonster.id}/projects/#{my_koko.code}/entries?to=20120131", { t: brian.api_key }
+          last_response.status.should eq(200)
+
+          content = JSON.parse(last_response.body)
+          content.length.should eq(2)
+        end
+        
+        it "returns the correct entries using from and to" do
+          get "/api/v1/groups/#{vermonster.id}/projects/#{my_koko.code}/entries?from=20120101&to=20120201", { t: brian.api_key }
+          last_response.status.should eq(200)
+
+          content = JSON.parse(last_response.body)
+          content.length.should eq(2)
+        end
+      end
     end
 
     context "Projects" do 

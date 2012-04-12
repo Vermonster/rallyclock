@@ -9,6 +9,23 @@ class Client < Sequel::Model
     "clients/#{account}"
   end
 
+  # options:
+  # to=YYYYMMDD
+  # from=YYYMMDD
+  def filter_entries(options={})
+    entries = Entry.filter(project_id: projects_dataset.map(:id)).all
+
+    if options.reject{|k,v|v.nil?}.empty?
+      entries
+    elsif options[:to] && options[:from]
+      entries.select {|e| e.date <= Date.parse(options[:to]) && e.date >= Date.parse(options[:from])}
+    elsif options[:to]
+      entries.select {|e| e.date <= Date.parse(options[:to])}
+    elsif options[:from]
+      entries.select {|e| e.date >= Date.parse(options[:from])}
+    end
+  end
+
   def validate
     super
     validates_presence [:name, :account, :group_id]
