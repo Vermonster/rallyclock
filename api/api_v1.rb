@@ -136,17 +136,18 @@ module RallyClock
 
         resource :users do
           before do
-            error!("Unauthorized", 401)    unless @group.admin?(current_user)
+            error!("Unauthorized", 401) unless @group.admin?(current_user)
           end
 
           post nil do
+            error!("User Not Found", 404) unless @user = User[email: params[:email]]
             @group.add_member(@user)
           end
 
           segment "/:username" do
             before do
               @user = @group.users_dataset.first(username: params[:username])
-              error!("User does not exist", 404) unless @user
+              error!("User Not Found", 404) unless @user
             end
 
             put nil do
@@ -161,7 +162,7 @@ module RallyClock
 
         resource :entries do
           before do
-            error!("Unauthorized", 401)    unless @group.admin?(current_user)
+            error!("Unauthorized", 401) unless @group.admin?(current_user)
           end
 
           get nil, :rabl => 'entries/index' do
