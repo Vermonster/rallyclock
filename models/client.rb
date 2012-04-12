@@ -3,6 +3,8 @@ class Client < Sequel::Model
   many_to_many :entries, :join_table => :projects
   many_to_one :group
 
+  add_association_dependencies :projects => :destroy
+
   def rel_path
     "clients/#{account}"
   end

@@ -3,6 +3,8 @@ class Project < Sequel::Model
 
   many_to_one :client
   one_to_many :entries
+  
+  add_association_dependencies :entries => :destroy
 
   def rel_path
     "projects/#{code}"

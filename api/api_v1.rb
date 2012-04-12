@@ -81,17 +81,53 @@ module RallyClock
         before do
           @group = Group[params[:group_id].to_i]
           error!("Group Not Found", 404) unless @group
-          error!("Unauthorized", 401)    unless @group.admin?(current_user)
         end
         
         delete nil do
+          error!("Unauthorized", 401)    unless @group.admin?(current_user)
           @group.destroy
         end
 
-        get(nil, :rabl => 'groups/show') {}
+        get nil, :rabl => 'groups/show' do
+          error!("Unauthorized", 401)    unless @group.admin?(current_user)
+        end
+
+        resource :projects do
+          segment "/:code" do
+            before do
+              error!("Unauthorized", 401) unless @group.users.include?(current_user)
+              @project = @group.clients.map(&:projects).flatten.find {|p| p.code == params[:code]} 
+              error!("Project Not Found", 404) unless @project
+            end
+            
+            resource :entries do
+              post nil do
+                current_user.add_entry Entry.new(params[:entry].merge(project_id: @project.id))
+              end
+
+              segment '/:entry_id' do
+                before do
+                  error!("Entry Not Found", 404) unless @entry = Entry[params[:entry_id].to_i]
+                  error!("Unauthorized", 401) unless current_user.entries.include?(@entry)
+                end
+
+                put nil do
+                  @entry.update(params[:entry])
+                end
+
+                delete nil do
+                  @entry.destroy
+                end
+
+                get(nil, :rabl => 'entries/show') {}
+              end
+            end
+          end
+        end
 
         resource :users do
           before do
+            error!("Unauthorized", 401)    unless @group.admin?(current_user)
             @user = User.filter({email: params[:email]}|{username: params[:username]}).first
             error!("User does not exist", 404) unless @user
           end
@@ -101,7 +137,7 @@ module RallyClock
           end
 
           put ":username" do
-            @group.add_admin(@user)
+            @group.memberships_dataset.first(user_id: @user.id).update(params[:user])
           end
 
           delete ":username" do
@@ -110,6 +146,10 @@ module RallyClock
         end
 
         resource :entries do
+          before do
+            error!("Unauthorized", 401)    unless @group.admin?(current_user)
+          end
+
           get nil, :rabl => 'entries/index' do
             @entries = Project.filter(client_id: @group.clients_dataset.map(:id)).map(&:entries).flatten
           end
@@ -126,6 +166,10 @@ module RallyClock
         end
 
         resource :clients do
+          before do
+            error!("Unauthorized", 401)    unless @group.admin?(current_user)
+          end
+
           post nil do
             error!("Client Already Exists", 422) if @group.clients_dataset.first(account: params[:client][:account])
             @group.add_client Client.new(params[:client])
@@ -186,31 +230,6 @@ module RallyClock
             end
           end
         end
-      end
-    end
-    
-    resource :entries do
-      before { authenticate! }
-
-      post nil do
-        current_user.add_entry Entry.new(params[:entry])
-      end
-
-      segment '/:entry_id' do
-        before do
-          error!("Entry Not Found", 404) unless @entry = Entry.first(id: params[:entry_id])
-          error!("Unauthorized", 401) unless current_user.entries.include?(@entry)
-        end
-
-        put nil do
-          @entry.update(params[:entry]) 
-        end
-
-        delete nil do
-          @entry.destroy
-        end
-      
-        get(nil, :rabl => 'entry') {}
       end
     end
   end

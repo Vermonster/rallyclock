@@ -8,9 +8,15 @@ describe RallyClock::API do
   context "v1" do
     let!(:u) { User.create(email: 'a@foo.com', password: 'apples', username: 'a') } 
     let!(:g) { Group.create(name: 'vermonster', owner_id: u.id) } 
+    let!(:c) { Client.create(name: 'verm', account: 'verm', group_id: g.id) }
+    let!(:p) { Project.create(name: 'rallyclock', code: 'r10', client_id: c.id) }
     let!(:bono) { User.create(email: 'b@foo.com', password: 'apples', username: 'bono') } 
+    let!(:edge) { User.create(email: 'c@foo.com', password: 'apples', username: 'edge') } 
 
-    before { Membership.create(user_id: u.id, group_id: g.id, admin: true) } 
+    before do
+      Membership.create(user_id: u.id, group_id: g.id)
+      Membership.create(user_id: bono.id, group_id: g.id)
+    end
 
     context "system" do
       it "ping" do
@@ -21,53 +27,53 @@ describe RallyClock::API do
 
     describe "entries" do
       context "creating" do
-        context "POST /entries" do
+        context "POST /groups/:id/projects/:code/entries" do
           it "should create an entry for the submitting user" do
-            post '/api/v1/entries', { t: u.api_key, entry: { note: "Slurm", time: 420 } }
+            post "/api/v1/groups/#{g.id}/projects/#{p.code}/entries", { t: bono.api_key, entry: { note: "Slurm", time: 420 } }
             last_response.status.should == 201
-            u.entries.should_not be_empty
+            bono.entries.should_not be_empty
           end
         end
       end
 
       context "update and delete" do
-        let!(:entry) { Entry.create(note: "SLURM!", time: 420, user_id: u.id) }
-        let!(:bono_entry) { Entry.create(note: "Sunday, Bloody Sunday.", time: 420, user_id: bono.id) }
+        let!(:entry) { Entry.create(note: "SLURM!", time: 420, user_id: u.id, project_id: p.id) }
+        let!(:bono_entry) { Entry.create(note: "Sunday, Bloody Sunday.", time: 420, user_id: bono.id, project_id: p.id) }
 
         context "PUT /entries/:id" do
           it "should update the given entry with the new information" do
-            put "/api/v1/entries/#{entry.id}", { t: u.api_key, entry: { note: "Slurm", time: 420 } }
+            put "/api/v1/groups/#{g.id}/projects/#{p.code}/entries/#{entry.id}", { t: u.api_key, entry: { note: "Slurm", time: 420 } }
             last_response.status.should == 200
             u.entries_dataset[entry.id].note.should == "Slurm"
             u.entries_dataset[entry.id].time.should == 420
           end
 
           it "should reject updating an entry that does not exist -- 404" do
-            put "/api/v1/entries/#{bono_entry.id}", { t: u.api_key, entry: { note: "Slurm", time: 420 } }
+            put "/api/v1/groups/#{g.id}/projects/#{p.code}/entries/#{bono_entry.id}", { t: u.api_key, entry: { note: "Slurm", time: 420 } }
             last_response.status.should == 401
           end
 
           it "should reject updating another users entry -- 401" do
-            put "/api/v1/entries/123091230", { t: u.api_key, entry: { note: "Slurm", time: 420 } }
+            put "/api/v1/groups/#{g.id}/projects/#{p.code}/entries/123091230", { t: u.api_key, entry: { note: "Slurm", time: 420 } }
             last_response.status.should == 404
           end
         end
 
         context "DELETE /entries/:id" do
           it "should delete the given entry" do
-            delete "/api/v1/entries/#{entry.id}", { t: u.api_key }
+            delete "/api/v1/groups/#{g.id}/projects/#{p.code}/entries/#{entry.id}", { t: u.api_key }
             last_response.status.should == 200
             u.entries.should be_empty
           end
 
           it "refuses to delete an entry not owned by the user -- 401" do
-            delete "/api/v1/entries/#{bono_entry.id}", { t: u.api_key }
+            delete "/api/v1/groups/#{g.id}/projects/#{p.code}/entries/#{bono_entry.id}", { t: u.api_key }
             last_response.status.should == 401
             bono.entries.should_not be_empty
           end
 
           it "refuses to delete an entry that does not exist -- 404" do
-            delete "/api/v1/entries/123091230", { t: u.api_key }
+            delete "/api/v1/groups/#{g.id}/projects/#{p.code}/entries/123091230", { t: u.api_key }
             last_response.status.should == 404
             u.entries.should_not be_empty
           end
@@ -82,10 +88,10 @@ describe RallyClock::API do
         it "creates a user" do
           expect do
             post "/api/v1/users", { email: 'asdlfkj@foo.com', password: 'apples', username: 'sdfkljsd' }
-          end.to change { User.count }.from(3).to(4)
+          end.to change { User.count }.from(4).to(5)
           last_response.status.should eq(201)
 
-          User.first(email: u.email).should_not be_nil
+          User.first(email: 'asdlfkj@foo.com').should_not be_nil
         end
 
         it "returns 422 if the Email has been taken" do
@@ -169,19 +175,19 @@ describe RallyClock::API do
       describe "group members" do
         context "POST /groups/:id/users" do
           it "adds a user to the group" do
-            post "/api/v1/groups/#{g.id}/users", {email: bono.email, t: u.api_key}
+            post "/api/v1/groups/#{g.id}/users", {email: edge.email, t: u.api_key}
             last_response.status.should eq(201)
 
             g.users.should include(u,bono)
           end
 
           it "returns 404 if the user doesn't exist" do
-            post "/api/v1/groups/#{g.id}/users", {email: 'c@foo.com', t: u.api_key}
+            post "/api/v1/groups/#{g.id}/users", {email: 'd@foo.com', t: u.api_key}
             last_response.status.should eq(404)
           end
 
           it "returns 401 if the user is not an admin" do
-            post "/api/v1/groups/#{g.id}/users", {email: 'c@foo.com', t: bono.api_key}
+            post "/api/v1/groups/#{g.id}/users", {email: 'd@foo.com', t: bono.api_key}
             last_response.status.should eq(401)
           end
         end
@@ -212,7 +218,7 @@ describe RallyClock::API do
           it "adds a client to the group -- returns 201" do
             post "/api/v1/groups/#{g.id}/clients", { client: { account: "LEX", name: "Luthor Industries" } , t: u.api_key } 
             last_response.status.should == 201
-            Client.count.should == 2
+            Client.count.should == 3
           end
 
           it "refuses to add a client if one with the same name already exists -- returns 422" do
@@ -272,7 +278,7 @@ describe RallyClock::API do
             it "adds a project to a client -- returns 201" do
               post "/api/v1/groups/#{g.id}/clients/#{client.account}/projects", { project: { name: "T-X", code: "TX" } , t: u.api_key } 
               last_response.status.should eq(201)
-              Project.count.should eq(2)
+              Project.count.should eq(3)
             end
 
             it "refuses to add a client if one with the same name already exists -- returns 422" do

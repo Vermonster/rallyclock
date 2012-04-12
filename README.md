@@ -10,7 +10,8 @@ A [Grape](http://github.com/intridea/grape) API mounted on RACK.
 GET /system/ping  
 
 (You)  
-GET /meGET /me/projects  
+GET /me  
+GET /me/projects  
 GET /me/entries  
 
 (Registration)  
@@ -41,9 +42,11 @@ PUT groups/:id/clients/:account/projects/:code
 DELETE groups/:id/clients/:account/projects/:code  
 
 (Entries)  
-GET groups/:id/entries  
-GET groups/:id/entries/:id  
-GET groups/:id/clients/:account/entries  
+GET groups/:id/projects/:code/entries  
+GET groups/:id/projects/:code/entries/:id
+PUT groups/:id/projects/:code/entries/:id
+DELETE groups/:id/projects/:code/entries/:id
+GET groups/:id/clients/:account/entries
 GET groups/:id/clients/:account/entries/:id  
 
 TODO 
@@ -55,7 +58,6 @@ GET /groups/:id/clients/:account/projects (?)
 Make sure puts and posts allow for all attributes  
 Actions to activate/archive clients and projects  
 Instead of 'groups/:id' maybe we should a group codename start the url so that we can have nice things like "curl http://rallyclock.com/api/v1/vermonster/clients/cyberdine/entries"  
-*FIX ENTRIES POST ENDPOINT* -- Creating entries doesn't tie them to a project  
 *ADD DATE TO ENTRY*  
 
 API_v1 (the second coming)  

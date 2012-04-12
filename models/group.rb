@@ -5,6 +5,7 @@ class Group < Sequel::Model
   many_to_many :users, :join_table => :memberships
 
   add_association_dependencies :memberships => :destroy
+  add_association_dependencies :clients => :destroy
 
   def rel_path
     "groups/#{id}"
