@@ -1,2 +1,2 @@
-object @user => nil
-attributes :email, :username, :api_key
+object @user
+attributes :email, :username

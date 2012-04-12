@@ -143,6 +143,10 @@ module RallyClock
             error!("Unauthorized", 401) unless @group.admin?(current_user)
           end
 
+          get nil, :rabl => 'users/index' do
+            @users = @group.users
+          end
+
           post nil do
             error!("User Not Found", 404) unless @user = User[email: params[:email]]
             @group.add_member(@user)
@@ -153,6 +157,8 @@ module RallyClock
               @user = @group.users_dataset.first(username: params[:username])
               error!("User Not Found", 404) unless @user
             end
+
+            get(nil, :rabl => 'users/show') {}
 
             put nil do
               @group.memberships_dataset.first(user_id: @user.id).update(params[:user])

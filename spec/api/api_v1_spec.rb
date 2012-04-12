@@ -271,7 +271,6 @@ describe RallyClock::API do
           end
         end
         
-
         context "DELETE groups/:group_id/clients/:id" do
           it "destroys an existing client -- returns 200" do
             delete "/api/v1/groups/#{g.id}/clients/#{client.account}", {t: u.api_key}

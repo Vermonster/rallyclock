@@ -34,12 +34,28 @@ describe "Read API" do
         last_response.status.should == 200
       end
 
-      context "clients" do
+      context "Group Clients" do
         it "returns all its clients" do
           get "/api/v1/groups/#{vermonster.id}/clients", {t: brian.api_key}
           last_response.status.should eq(200)
           content = JSON.parse(last_response.body)
           content.length.should eq(1)
+        end
+      end
+
+      context "Group Users" do
+        it "returns all its users" do
+          get "/api/v1/groups/#{vermonster.id}/users", {t: brian.api_key}
+          last_response.status.should eq(200)
+          content = JSON.parse(last_response.body)
+          content.length.should eq(2)
+        end
+
+        it "returns the given user" do
+          get "/api/v1/groups/#{vermonster.id}/users/#{brian.username}", {t: brian.api_key}
+          last_response.status.should eq(200)
+          content = JSON.parse(last_response.body)
+          content['username'].should eq("Brian")
         end
       end
     end
