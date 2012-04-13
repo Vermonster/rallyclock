@@ -82,13 +82,13 @@ module RallyClock
       before { authenticate! }
 
       post nil do
-        g = Group.create(name: params[:name])
+        g = Group.create(params[:group])
         Membership.create(user_id: current_user.id, group_id: g.id, admin: true)
       end
 
       segment "/:group_id" do
         before do
-          @group = Group[params[:group_id].to_i]
+          @group = Group[params[:group_id]]
           error!("Group Not Found", 404) unless @group
         end
         
@@ -100,172 +100,188 @@ module RallyClock
         get nil, :rabl => 'groups/show' do
           error!("Unauthorized", 401) unless @group.admin?(current_user)
         end
+      end
+    end
 
-        resource :projects do
-          segment "/:code" do
-            before do
-              error!("Unauthorized", 401) unless @group.users.include?(current_user)
-              @project = @group.clients.map(&:projects).flatten.find {|p| p.code == params[:code]} 
-              error!("Project Not Found", 404) unless @project
-            end
-            
-            resource :entries do
-              get nil, :rabl => 'entries/index' do
-                @entries = @project.filter_entries(to: params[:to], from: params[:from])
-              end
+    segment "/:handle" do
+      before do
+        authenticate!
+        error!("Group Not Found", 404) unless @group = Group[handle: params[:handle]]
+      end
 
-              post nil do
-                current_user.add_entry Entry.new(params[:entry].merge(project_id: @project.id))
-              end
+      get nil, :rabl => 'groups/show' do
+        error!("Unauthorized", 401) unless @group.admin?(current_user)
+      end
+        
+      delete nil do
+        error!("Unauthorized", 401) unless @group.admin?(current_user)
+        @group.destroy
+      end
 
-              segment '/:entry_id' do
-                before do
-                  error!("Entry Not Found", 404) unless @entry = Entry[params[:entry_id].to_i]
-                  error!("Unauthorized", 401) unless current_user.entries.include?(@entry)
-                end
-
-                put nil do
-                  @entry.update(params[:entry])
-                end
-
-                delete nil do
-                  @entry.destroy
-                end
-
-                get(nil, :rabl => 'entries/show') {}
-              end
-            end
-          end
-        end
-
-        resource :users do
+      resource :projects do
+        segment "/:code" do
           before do
-            error!("Unauthorized", 401) unless @group.admin?(current_user)
+            error!("Unauthorized", 401) unless @group.users.include?(current_user)
+            @project = @group.clients.map(&:projects).flatten.find {|p| p.code == params[:code]} 
+            error!("Project Not Found", 404) unless @project
           end
-
-          get nil, :rabl => 'users/index' do
-            @users = @group.users
-          end
-
-          post nil do
-            error!("User Not Found", 404) unless @user = User[email: params[:email]]
-            @group.add_member(@user)
-          end
-
-          segment "/:username" do
-            before do
-              @user = @group.users_dataset.first(username: params[:username])
-              error!("User Not Found", 404) unless @user
-            end
-
-            get(nil, :rabl => 'users/show') {}
-
-            put nil do
-              @group.memberships_dataset.first(user_id: @user.id).update(params[:user])
-            end
-
-            delete nil do
-              @group.remove_member(@user)
-            end
-
-            resource :entries do
-              get nil, :rabl => 'entries/index' do
-                @entries = @user.filter_entries(to: params[:to], from: params[:from])
-              end
-            end
-          end
-        end
-
-        resource :entries do
-          before do
-            error!("Unauthorized", 401) unless @group.admin?(current_user)
-          end
-
-          get nil, :rabl => 'entries/index' do
-            @entries = Project.filter(client_id: @group.clients_dataset.map(:id)).map(&:entries).flatten
-          end
-
-          segment "/:entry_id" do
-            before do
-              @entry = Entry[params[:entry_id].to_i]
-              error!("Entry Not Found", 404) unless @entry
-              error!("Unauthorized", 401) unless @group.users_dataset[@entry.user_id]
-            end
-            
-            get(nil, :rabl => 'entries/show') {}
-          end
-        end
-
-        resource :clients do
-          before do
-            error!("Unauthorized", 401) unless @group.admin?(current_user)
-          end
-
-          get nil, :rabl => 'clients/index' do
-            @clients = @group.clients
-          end
-
-          post nil do
-            error!("Client Already Exists", 422) if @group.clients_dataset.first(account: params[:client][:account])
-            @group.add_client Client.new(params[:client])
-          end
-
-          segment "/:client_account" do
-            before do
-              error!("Client Not Found", 404) unless @client = @group.clients_dataset.first(account: params[:client_account])
-            end
           
-            put nil do
-              @client.update(params[:client])
+          resource :entries do
+            get nil, :rabl => 'entries/index' do
+              @entries = @project.filter_entries(to: params[:to], from: params[:from])
             end
 
-            delete nil do
-              @client.destroy 
+            post nil do
+              current_user.add_entry Entry.new(params[:entry].merge(project_id: @project.id))
             end
 
-            get(nil, :rabl => 'clients/show') {}
-
-            resource :entries do
-              get nil, :rabl => 'entries/index' do
-                @entries = @client.filter_entries(to: params[:to], from: params[:from])
+            segment '/:entry_id' do
+              before do
+                error!("Entry Not Found", 404) unless @entry = Entry[params[:entry_id].to_i]
+                error!("Unauthorized", 401) unless current_user.entries.include?(@entry)
               end
 
-              segment "/:entry_id" do
-                before do
-                  @entry = Entry[params[:entry_id].to_i]
-                  error!("Entry Not Found", 404) unless @entry
-                  error!("Unauthorized", 401) unless @client.projects_dataset[@entry.project_id]
-                end
-                
-                get(nil, :rabl => 'entries/show') {}
+              put nil do
+                @entry.update(params[:entry])
               end
+
+              delete nil do
+                @entry.destroy
+              end
+
+              get(nil, :rabl => 'entries/show') {}
+            end
+          end
+        end
+      end
+
+      resource :users do
+        before do
+          error!("Unauthorized", 401) unless @group.admin?(current_user)
+        end
+
+        get nil, :rabl => 'users/index' do
+          @users = @group.users
+        end
+
+        post nil do
+          error!("User Not Found", 404) unless @user = User[email: params[:email]]
+          @group.add_member(@user)
+        end
+
+        segment "/:username" do
+          before do
+            @user = @group.users_dataset.first(username: params[:username])
+            error!("User Not Found", 404) unless @user
+          end
+
+          get(nil, :rabl => 'users/show') {}
+
+          put nil do
+            @group.memberships_dataset.first(user_id: @user.id).update(params[:user])
+          end
+
+          delete nil do
+            @group.remove_member(@user)
+          end
+
+          resource :entries do
+            get nil, :rabl => 'entries/index' do
+              @entries = @user.filter_entries(to: params[:to], from: params[:from])
+            end
+          end
+        end
+      end
+
+      resource :entries do
+        before do
+          error!("Unauthorized", 401) unless @group.admin?(current_user)
+        end
+
+        get nil, :rabl => 'entries/index' do
+          @entries = Project.filter(client_id: @group.clients_dataset.map(:id)).map(&:entries).flatten
+        end
+
+        segment "/:entry_id" do
+          before do
+            @entry = Entry[params[:entry_id].to_i]
+            error!("Entry Not Found", 404) unless @entry
+            error!("Unauthorized", 401) unless @group.users_dataset[@entry.user_id]
+          end
+          
+          get(nil, :rabl => 'entries/show') {}
+        end
+      end
+
+      resource :clients do
+        before do
+          error!("Unauthorized", 401) unless @group.admin?(current_user)
+        end
+
+        get nil, :rabl => 'clients/index' do
+          @clients = @group.clients
+        end
+
+        post nil do
+          error!("Client Already Exists", 422) if @group.clients_dataset.first(account: params[:client][:account])
+          @group.add_client Client.new(params[:client])
+        end
+
+        segment "/:client_account" do
+          before do
+            error!("Client Not Found", 404) unless @client = @group.clients_dataset.first(account: params[:client_account])
+          end
+        
+          put nil do
+            @client.update(params[:client])
+          end
+
+          delete nil do
+            @client.destroy 
+          end
+
+          get(nil, :rabl => 'clients/show') {}
+
+          resource :entries do
+            get nil, :rabl => 'entries/index' do
+              @entries = @client.filter_entries(to: params[:to], from: params[:from])
             end
 
-            resource :projects do
-              get nil, :rabl => 'projects/index' do
-                @projects = Project.filter(:client_id => @group.clients_dataset.map(:id))
+            segment "/:entry_id" do
+              before do
+                @entry = Entry[params[:entry_id].to_i]
+                error!("Entry Not Found", 404) unless @entry
+                error!("Unauthorized", 401) unless @client.projects_dataset[@entry.project_id]
+              end
+              
+              get(nil, :rabl => 'entries/show') {}
+            end
+          end
+
+          resource :projects do
+            get nil, :rabl => 'projects/index' do
+              @projects = Project.filter(:client_id => @group.clients_dataset.map(:id))
+            end
+
+            post nil do
+              error!("Project Already Exists", 422) if @client.projects_dataset.first(code: params[:project][:code])
+              @client.add_project Project.new(params[:project])
+            end
+
+            segment "/:project_code" do
+              before do
+                error!("Project Does Not Exist", 404) unless @project = @client.projects_dataset.first(code: params[:project_code])
               end
 
-              post nil do
-                error!("Project Already Exists", 422) if @client.projects_dataset.first(code: params[:project][:code])
-                @client.add_project Project.new(params[:project])
+              put nil do
+                @project.update(params[:project])
               end
-  
-              segment "/:project_code" do
-                before do
-                  error!("Project Does Not Exist", 404) unless @project = @client.projects_dataset.first(code: params[:project_code])
-                end
 
-                put nil do
-                  @project.update(params[:project])
-                end
-
-                delete nil do
-                  @project.destroy 
-                end
-
-                get(nil, :rabl => 'projects/show') {}
+              delete nil do
+                @project.destroy 
               end
+
+              get(nil, :rabl => 'projects/show') {}
             end
           end
         end

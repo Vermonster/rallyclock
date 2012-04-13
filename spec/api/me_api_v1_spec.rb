@@ -8,7 +8,7 @@ describe "Me" do
   let!(:brian) { User.create(username: 'bkaney', email: 'bkaney@vermonster.com', password: 'foo') }
   let!(:me) { User.create(username: 'tx', email: 'tx@gmail.com', password: 'foo') }
   let!(:token) { me.api_key }
-  let!(:vermonster) { Group.create(name: 'Vermonster', owner_id: brian.id) }
+  let!(:vermonster) { Group.create(name: 'Vermonster', handle: 'vermonster', owner_id: brian.id) }
   let!(:mem) { Membership.create(user_id: me.id, group_id: vermonster.id) }
   let!(:toy) { Client.create(name: 'toy', account: 'toy', group_id: vermonster.id) }
   let!(:proj) { Project.create(name: 'proj', code: 'proj', client_id: toy.id) }

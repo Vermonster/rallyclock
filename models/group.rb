@@ -13,8 +13,8 @@ class Group < Sequel::Model
 
   def validate
     super
-    validates_presence :name
-    validates_unique [:name, :owner_id]
+    validates_presence [:name, :handle]
+    validates_unique :handle, [:name, :owner_id]
   end
 
   def admins

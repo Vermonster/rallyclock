@@ -10,7 +10,7 @@ describe Client do
 
   before do
     u = User.create(email: 'a@foo.com', password: 'apples', username: 'a')
-    g = Group.create(name: 'vermonster', owner_id: u.id)
+    g = Group.create(name: 'vermonster', handle: 'vermonster', owner_id: u.id)
     @c = Client.create(name: 'verm', group_id: g.id, account: 'verm')
   end
 
