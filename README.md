@@ -25,42 +25,42 @@ POST /users
 POST /sessions  
 
 (* Groups)
-GET /groups/:id  
-POST /groups  
-DELETE /groups  
+GET /:handle  
+POST /groups (handle must be globally unique)  
+DELETE /:handle  
 
 (* Members)  
-GET /groups/:id/users
-GET /groups/:id/users/:username
-POST /groups/:id/users
-PUT /groups/:id/users/:username  
-DELETE /groups/:id/users/:username (delete membership)  
+GET /:handle/users
+GET /:handle/users/:username
+POST /:handle/users
+PUT /:handle/users/:username  
+DELETE /:handle/users/:username (delete membership)  
 
 (* Clients)  
-GET /groups/:id/clients
-GET /groups/:id/clients/:account
-POST /groups/:id/clients  
-PUT /groups/:id/clients/:account  
-DELETE /groups/:id/clients/:account  
+GET /:handle/clients
+GET /:handle/clients/:account
+POST /:handle/clients  
+PUT /:handle/clients/:account  
+DELETE /:handle/clients/:account  
 
 (* Projects)  
-GET /groups/:id/clients/:account/projects
-GET /groups/:id/clients/:account/projects/:code  
-POST groups/:id/clients/:account/projects  
-PUT groups/:id/clients/:account/projects/:code  
-DELETE groups/:id/clients/:account/projects/:code  
+GET /:handle/clients/:account/projects
+GET /:handle/clients/:account/projects/:code  
+POST /:handle/clients/:account/projects  
+PUT /:handle/clients/:account/projects/:code  
+DELETE /:handle/clients/:account/projects/:code  
 
 (* Entries) 
-GET groups/:id/users/entries
-GET groups/:id/users/entries?from=YYYYMMDD&to=YYYYMMDD
-GET groups/:id/clients/:account/entries
-GET groups/:id/clients/:account/entries?from=YYYYMMDD&to=YYYYMMDD
-GET groups/:id/clients/:account/entries/:id  
-GET groups/:id/projects/:code/entries  
-GET groups/:id/projects/:code/entries?from=YYYYMMDD&to=YYYYMMDD
-GET groups/:id/projects/:code/entries/:id
-PUT groups/:id/projects/:code/entries/:id
-DELETE groups/:id/projects/:code/entries/:id
+GET /:handle/users/entries
+GET /:handle/users/entries?from=YYYYMMDD&to=YYYYMMDD
+GET /:handle/clients/:account/entries
+GET /:handle/clients/:account/entries?from=YYYYMMDD&to=YYYYMMDD
+GET /:handle/clients/:account/entries/:id  
+GET /:handle/projects/:code/entries  
+GET /:handle/projects/:code/entries?from=YYYYMMDD&to=YYYYMMDD
+GET /:handle/projects/:code/entries/:id
+PUT /:handle/projects/:code/entries/:id
+DELETE /:handle/projects/:code/entries/:id
 
 API_v1 (the second coming/electric boogaloo/judgment day) 
 Project Assignments
