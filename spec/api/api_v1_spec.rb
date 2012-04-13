@@ -27,7 +27,7 @@ describe RallyClock::API do
 
     describe "entries" do
       context "creating" do
-        context "POST /:group_handle/projects/:code/entries" do
+        context "POST /:handle/projects/:code/entries" do
           it "should create an entry for the submitting user" do
             post "/api/v1/#{g.handle}/projects/#{p.code}/entries", { t: bono.api_key, entry: { note: "Slurm", time: 420 } }
             last_response.status.should == 201
@@ -192,7 +192,7 @@ describe RallyClock::API do
           end
         end
 
-        context "PUT /groups/:group_id/users/:username" do
+        context "PUT /:handle/users/:username" do
           it "updates an existing user" do
             put "/api/v1/#{g.handle}/users/#{bono.username}", { :user => { admin: true }, t: u.api_key } 
             last_response.status.should eq(200)
@@ -210,7 +210,7 @@ describe RallyClock::API do
           end
         end
 
-        context "DELETE /groups/:group_id/users/:username" do
+        context "DELETE /:handle/users/:username" do
           it "removes a user from the group" do
             g.users.should include(bono)
             delete "/api/v1/#{g.handle}/users/#{bono.username}", { t: u.api_key } 
@@ -233,7 +233,7 @@ describe RallyClock::API do
       describe "group clients" do
         let!(:client) { Client.create(name: "Wayne Enterprises", group_id: g.id, account: "BRRUUCE") }
 
-        context "POST /groups/:group_id/clients" do
+        context "POST /:handle/clients" do
           it "adds a client to the group -- returns 201" do
             post "/api/v1/#{g.handle}/clients", { client: { account: "LEX", name: "Luthor Industries" } , t: u.api_key } 
             last_response.status.should == 201
@@ -251,7 +251,7 @@ describe RallyClock::API do
           end
         end
 
-        context "PUT groups/:group_id/clients/:id" do
+        context "PUT :handle/clients/:id" do
           it "updates the existing client -- returns 200" do
             put "/api/v1/#{g.handle}/clients/#{client.account}", {t: u.api_key, client: {name: 'Bioware', account: "BIO"} }
             last_response.status.should eq(200)
@@ -271,7 +271,7 @@ describe RallyClock::API do
           end
         end
         
-        context "DELETE groups/:group_id/clients/:id" do
+        context "DELETE :handle/clients/:id" do
           it "destroys an existing client -- returns 200" do
             delete "/api/v1/#{g.handle}/clients/#{client.account}", {t: u.api_key}
             last_response.status.should eq(200)
@@ -292,7 +292,7 @@ describe RallyClock::API do
           let!(:client) { Client.create(name: "Cyberdyne", group_id: g.id, account: "IMCLEO") }
           let!(:project) { Project.create(name: "Skynet", client_id: client.id, code: "WHOAREYOU") }
 
-          context "POST groups/:group_id/clients/:client_id/projects" do
+          context "POST :handle/clients/:client_id/projects" do
             it "adds a project to a client -- returns 201" do
               post "/api/v1/#{g.handle}/clients/#{client.account}/projects", { project: { name: "T-X", code: "TX" } , t: u.api_key } 
               last_response.status.should eq(201)
@@ -313,7 +313,7 @@ describe RallyClock::API do
             end
           end
 
-          context "PUT groups/:group_id/clients/:client_id/projects/:id" do
+          context "PUT :handle/clients/:client_id/projects/:id" do
             it "updates the existing project -- returns 200" do
               put "/api/v1/#{g.handle}/clients/#{client.account}/projects/#{project.code}", {
                 t: u.api_key, 
@@ -342,7 +342,7 @@ describe RallyClock::API do
             end
           end
 
-          context "DELETE groups/:group_id/clients/:client_id/projects/:id" do
+          context "DELETE :handle/clients/:client_id/projects/:id" do
             it "destroys an existing project -- returns 200" do
               delete "/api/v1/#{g.handle}/clients/#{client.account}/projects/#{project.code}", {t: u.api_key}
               last_response.status.should eq(200)

@@ -155,7 +155,7 @@ describe "Read API" do
         last_response.status.should eq(401)
       end
       
-      describe "GET /api/v1/groups/:group_id/users/entries?from=YYYYMMDD&to=YYYYMMDD" do
+      describe "GET /api/v1/:handle/users/entries?from=YYYYMMDD&to=YYYYMMDD" do
         before do
           Entry.create(note: 'entry #3', time: 10, date: '2011-12-31', project_id: my_koko.id, user_id: joe.id) 
           Entry.create(note: 'entry #4', time: 10, date: '2012-01-01', project_id: my_koko.id, user_id: joe.id) 
@@ -195,7 +195,7 @@ describe "Read API" do
         end
       end
       
-      describe "GET /api/v1/groups/:group_id/clients/entries?from=YYYYMMDD&to=YYYYMMDD" do
+      describe "GET /api/v1/:handle/clients/entries?from=YYYYMMDD&to=YYYYMMDD" do
         before do
           Entry.create(note: 'entry #3', time: 10, date: '2011-12-31', project_id: my_koko.id, user_id: joe.id) 
           Entry.create(note: 'entry #4', time: 10, date: '2012-01-01', project_id: my_koko.id, user_id: joe.id) 
@@ -235,7 +235,7 @@ describe "Read API" do
         end
       end
       
-      describe "GET /api/v1/groups/:group_id/projects/:code/entries?from=YYYYMMDD&to=YYYYMMDD" do
+      describe "GET /api/v1/:handle/projects/:code/entries?from=YYYYMMDD&to=YYYYMMDD" do
         before do
           Entry.create(note: 'entry #3', time: 10, date: '2011-12-31', project_id: my_koko.id, user_id: joe.id) 
           Entry.create(note: 'entry #4', time: 10, date: '2012-01-01', project_id: my_koko.id, user_id: joe.id) 
