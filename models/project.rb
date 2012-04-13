@@ -11,13 +11,15 @@ class Project < Sequel::Model
   def rel_path
     "projects/#{code}"
   end
-  
+ 
+  def entries
+    Entry.filter(project_id: id).all
+  end
+
   # options:
   # to=YYYYMMDD
   # from=YYYMMDD
   def filter_entries(options={})
-    entries = Entry.filter(project_id: id).all
-
     if options.reject{|k,v|v.nil?}.empty?
       entries
     elsif options[:to] && options[:from]

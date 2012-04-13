@@ -58,8 +58,8 @@ module RallyClock
 
     resource :users do
       post nil do
-        error!('Username already taken', 422) if User.first(username: params[:username])
-        error!('Email already taken', 422) if User.first(email: params[:email])
+        error!('Username already taken', 422) if User[username: params[:username]]
+        error!('Email already taken', 422) if User[email: params[:email]]
         u = User.new(email: params[:email], password: params[:password], username: params[:username])
         error!('Invalid Username or Email', 403) unless u.valid?
         u.save
@@ -137,7 +137,7 @@ module RallyClock
 
             segment '/:entry_id' do
               before do
-                error!("Entry Not Found", 404) unless @entry = Entry[params[:entry_id].to_i]
+                error!("Entry Not Found", 404) unless @entry = Entry[params[:entry_id]]
                 error!("Unauthorized", 401) unless current_user.entries.include?(@entry)
               end
 
@@ -204,7 +204,7 @@ module RallyClock
 
         segment "/:entry_id" do
           before do
-            @entry = Entry[params[:entry_id].to_i]
+            @entry = Entry[params[:entry_id]]
             error!("Entry Not Found", 404) unless @entry
             error!("Unauthorized", 401) unless @group.users_dataset[@entry.user_id]
           end

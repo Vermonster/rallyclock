@@ -9,12 +9,14 @@ class Client < Sequel::Model
     "clients/#{account}"
   end
 
+  def entries
+    Entry.filter(project_id: projects_dataset.map(:id)).all
+  end
+
   # options:
   # to=YYYYMMDD
   # from=YYYMMDD
   def filter_entries(options={})
-    entries = Entry.filter(project_id: projects_dataset.map(:id)).all
-
     if options.reject{|k,v|v.nil?}.empty?
       entries
     elsif options[:to] && options[:from]
